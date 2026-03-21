@@ -1,30 +1,35 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Stethoscope, Calendar, PlusCircle, User } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { C } from '@/theme';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#3b82f6',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarActiveTintColor: C.tealLight,
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.45)',
         tabBarStyle: {
-          borderTopColor: '#f3f4f6',
+          backgroundColor: C.tealDark,
+          borderTopColor: 'transparent',
+          height: 60,
         },
-        headerStyle: {
-          backgroundColor: '#fff',
+        tabBarLabelStyle: {
+          fontSize: 10,
+          marginBottom: 6,
         },
-        headerTitleStyle: {
-          fontWeight: '600',
-        },
+        headerStyle: { backgroundColor: C.tealDark },
+        headerTitleStyle: { fontWeight: '700', color: C.white, letterSpacing: 1 },
+        headerTintColor: C.white,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Médicos',
+          title: 'VISITA',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Stethoscope size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
@@ -33,7 +38,7 @@ export default function TabLayout() {
         options={{
           title: 'Agenda',
           tabBarIcon: ({ color, size }) => (
-            <Calendar size={size} color={color} />
+            <Ionicons name="calendar-outline" size={size} color={color} />
           ),
         }}
       />
@@ -42,7 +47,7 @@ export default function TabLayout() {
         options={{
           title: 'Registrar',
           tabBarIcon: ({ color, size }) => (
-            <PlusCircle size={size} color={color} />
+            <Ionicons name="add-circle-outline" size={size} color={color} />
           ),
         }}
       />
@@ -51,7 +56,7 @@ export default function TabLayout() {
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color, size }) => (
-            <User size={size} color={color} />
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />

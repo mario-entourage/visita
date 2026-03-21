@@ -1,0 +1,175 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    // Must be signed-in with an @entouragelab.com account
+    function isEntourageUser() {
+      return request.auth != null
+          && request.auth.token.email.matches('.*@entouragelab\\.com');
+    }
+
+    // Static super-admin list (mirrors SUPER_ADMIN_EMAILS in provider.tsx)
+    function isSuperAdmin() {
+      return isEntourageUser()
+          && request.auth.token.email in [
+               'caio@entouragelab.com',
+               'mario@entouragelab.com',
+               'marcos.freitas@entouragelab.com',
+               'tiago.fonseca@entouragelab.com'
+             ];
+    }
+
+    // Dynamic admin: document must exist in roles_admin
+    function isDynamicAdmin() {
+      return isEntourageUser()
+          && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isSuperAdmin() || isDynamicAdmin();
+    }
+
+    // Manager or admin: gerente role or admin
+    function isManagerOrAdmin() {
+      return isAdmin()
+          || (isEntourageUser()
+              && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role in ['gerente', 'admin']);
+    }
+
+    // ── doctors ───────────────────────────────────────────────────────────────
+    // Any rep can read. Admins can write anything.
+    // Managers can assign reps to doctors (assignedRepId).
+    // Reps can update only the CRM-computed fields (touches, propensity, etc.)
+    // Reps can also report a doctor as not found at their address (reported=true only).
+    match /doctors/{doctorId} {
+      allow read: if isEntourageUser();
+
+      allow create: if isAdmin()
+                    || (isEntourageUser()
+                        && request.resource.data.createdByRepId == request.auth.uid);
+
+      allow delete: if isAdmin();
+
+      allow update: if isAdmin()
+                    || (isManagerOrAdmin()
+                        && request.resource.data.diff(resource.data)
+                             .affectedKeys()
+                             .hasOnly(['assignedRepId', 'updatedAt']))
+                    || (isEntourageUser()
+                        && request.resource.data.diff(resource.data)
+                             .affectedKeys()
+                             .hasOnly([
+                               'propensityScore',
+                               'lastInteractionAt',
+                               'lastInteractionResult',
+                               'totalTouches',
+                               'flaggedForFollowUp',
+                               'updatedAt'
+                             ]))
+                    // Reps can set reported=true (flag as not at address); cannot clear it
+                    || (isEntourageUser()
+                        && request.resource.data.reported == true
+                        && request.resource.data.diff(resource.data)
+                             .affectedKeys()
+                             .hasOnly([
+                               'reported',
+                               'reportedAt',
+                               'reportedBy',
+                               'reportedReason',
+                               'updatedAt'
+                             ]));
+    }
+
+    // ── doctor_reports ────────────────────────────────────────────────────────
+    // Reps can create reports (doctor-not-at-address).
+    // Managers, analysts, and admins can read all reports to follow up.
+    // Only admins can update (mark resolved) or delete.
+    match /doctor_reports/{reportId} {
+      allow create: if isEntourageUser()
+                    && request.resource.data.repId == request.auth.uid;
+
+      // Managers and admins see all reports. Analysts also see all (for data cleanup).
+      // Reps can read only their own reports.
+      allow read: if isManagerOrAdmin()
+                  || (isEntourageUser()
+                      && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'analista')
+                  || (isEntourageUser()
+                      && resource.data.repId == request.auth.uid);
+
+      allow update: if isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    // ── interactions ─────────────────────────────────────────────────────────
+    // Any rep can read all interactions. Reps can create their own.
+    // Only the owning rep or an admin can update/delete.
+    match /interactions/{interactionId} {
+      allow read: if isEntourageUser();
+
+      allow create: if isEntourageUser()
+                    && request.resource.data.repId == request.auth.uid;
+
+      allow update, delete: if isEntourageUser()
+                            && (
+                                 resource.data.repId == request.auth.uid
+                                 || isAdmin()
+                               );
+    }
+
+    // ── scheduled_visits ─────────────────────────────────────────────────────
+    // Reps can read their own visits. Admins can read/write all.
+    // Reps can create their own visits (self-assigned, e.g. from Calendar sync).
+    // Reps can update their own visits (e.g. to link googleCalendarEventId).
+    match /scheduled_visits/{visitId} {
+      allow read: if isEntourageUser()
+                  && (resource.data.repId == request.auth.uid || isAdmin());
+
+      allow create: if isAdmin()
+                    || isManagerOrAdmin()
+                    || (isEntourageUser()
+                        && request.resource.data.repId == request.auth.uid
+                        && request.resource.data.assignedBy == request.auth.uid);
+
+      allow update: if isAdmin()
+                    || isManagerOrAdmin()
+                    || (isEntourageUser()
+                        && resource.data.repId == request.auth.uid
+                        && request.resource.data.repId == resource.data.repId);
+
+      allow delete: if isAdmin();
+    }
+
+    // ── weekly_goals ───────────────────────────────────────────────────────────
+    // Managers set weekly visit targets for reps.
+    match /weekly_goals/{goalId} {
+      allow read: if isEntourageUser();
+      allow write: if isManagerOrAdmin();
+    }
+
+    // ── roles ─────────────────────────────────────────────────────────────────
+    // Each user can read their own role doc. Only admins can assign roles.
+    // Fields: { role: 'representante'|'gerente'|'analista'|'admin' }
+    match /roles/{userId} {
+      allow read: if isEntourageUser() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+
+    // ── roles_admin (legacy) ────────────────────────────────────────────────
+    // Users can read their own role doc (to check if they're admin).
+    // Only super-admins can grant/revoke admin status.
+    match /roles_admin/{userId} {
+      allow read: if isEntourageUser() && request.auth.uid == userId;
+      allow write: if isSuperAdmin();
+    }
+
+    // ── representantes ────────────────────────────────────────────────────────
+    // Any rep can read profiles. Each rep can write only their own.
+    match /representantes/{userId} {
+      allow read: if isEntourageUser();
+      allow write: if isEntourageUser() && request.auth.uid == userId;
+    }
+  }
+}

@@ -67,12 +67,12 @@ export default function VisitDetailScreen() {
             {STATUS_LABELS[visit.status] || visit.status}
           </Text>
 
-          {visit.notes && (
+          {visit.notes ? (
             <>
               <Text style={styles.label}>Observações</Text>
               <Text style={styles.value}>{visit.notes}</Text>
             </>
-          )}
+          ) : null}
         </View>
       </ScrollView>
     </>

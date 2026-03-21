@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { View, Alert, StyleSheet } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { View, StyleSheet } from 'react-native';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import * as Location from 'expo-location';
 import { GeoPoint } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase/provider';
 import { createInteraction } from '@/services/interactions.service';
+import { recordInteractionOnDoctor } from '@/services/doctors.service';
 import {
   InteractionForm,
   type InteractionFormValues,
 } from '@/components/InteractionForm';
+import { C } from '@/theme';
 
 export default function NewInteractionScreen() {
   const { doctorId, doctorName } = useLocalSearchParams<{
@@ -35,7 +37,7 @@ export default function NewInteractionScreen() {
           location = new GeoPoint(loc.coords.latitude, loc.coords.longitude);
         }
       } catch {
-        // Location is optional
+        // Location is optional — continue without it
       }
 
       await createInteraction(db, {
@@ -48,26 +50,38 @@ export default function NewInteractionScreen() {
         active: true,
       });
 
-      Alert.alert('Sucesso', 'Interação registrada!');
+      // Update doctor stats atomically
+      await recordInteractionOnDoctor(db, doctorId, data.resultCode);
+
       router.back();
     } catch (err) {
       console.error('Error creating interaction:', err);
-      Alert.alert('Erro', 'Não foi possível registrar a interação.');
+      // Re-throw so InteractionForm can surface to user if needed
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <InteractionForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-    </View>
+    <>
+      <Stack.Screen
+        options={{
+          title: doctorName ? `Interação – ${doctorName}` : 'Registrar Interação',
+          headerStyle: { backgroundColor: C.tealDark },
+          headerTitleStyle: { color: C.white, fontWeight: '700' },
+          headerTintColor: C.white,
+        }}
+      />
+      <View style={styles.container}>
+        <InteractionForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: C.bg,
   },
 });

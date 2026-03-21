@@ -4,18 +4,9 @@ import {
   persistentLocalCache,
   persistentMultipleTabManager,
 } from 'firebase/firestore';
-import { initializeAuth, Persistence } from 'firebase/auth';
-
-// In Firebase v12+, getReactNativePersistence is available at runtime via the
-// react-native conditional export in @firebase/auth, but is not surfaced in
-// the public TypeScript types of `firebase/auth`. We import the runtime export
-// directly from the package internals.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getReactNativePersistence } = require('@firebase/auth') as {
-  getReactNativePersistence: (storage: any) => Persistence;
-};
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeAuth, getAuth, browserLocalPersistence, Persistence } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
+import { Platform } from 'react-native';
 import { firebaseConfig } from './config';
 
 let initialized = false;
@@ -30,9 +21,23 @@ function createFirebaseServices() {
     }),
   });
 
-  const auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-  });
+  let auth;
+  if (Platform.OS === 'web') {
+    // On web, use browser persistence (localStorage)
+    auth = initializeAuth(app, {
+      persistence: browserLocalPersistence,
+    });
+  } else {
+    // On native (iOS/Android), use AsyncStorage persistence
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    const { getReactNativePersistence } = require('@firebase/auth') as {
+      getReactNativePersistence: (storage: any) => Persistence;
+    };
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  }
 
   const storage = getStorage(app);
 

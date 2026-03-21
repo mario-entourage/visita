@@ -6,12 +6,22 @@ import React, {
   useMemo,
   useState,
   useEffect,
+  useCallback,
 } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore, doc, onSnapshot } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
 import { FirebaseStorage } from 'firebase/storage';
+import {
+  UserRole,
+  RolePermissions,
+  ROLE_PERMISSIONS,
+  getPermissions,
+} from '@/types/roles';
 
+// ---------------------------------------------------------------------------
+// Static super-admin list (always gets 'admin' role)
+// ---------------------------------------------------------------------------
 const SUPER_ADMIN_EMAILS = [
   'caio@entouragelab.com',
   'mario@entouragelab.com',
@@ -19,6 +29,9 @@ const SUPER_ADMIN_EMAILS = [
   'tiago.fonseca@entouragelab.com',
 ];
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 interface FirebaseProviderProps {
   children: ReactNode;
   firebaseApp: FirebaseApp;
@@ -42,6 +55,17 @@ export interface FirebaseContextState {
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
+  // Role system
+  role: UserRole;
+  /** The role currently being used (may differ from `role` during impersonation) */
+  effectiveRole: UserRole;
+  roleLoading: boolean;
+  permissions: RolePermissions;
+  /** True when the admin is impersonating another role */
+  isImpersonating: boolean;
+  /** Switch to impersonate a role (admin only). Pass null to stop. */
+  impersonate: (role: UserRole | null) => void;
+  // Backwards-compat
   isAdmin: boolean;
   isAdminLoading: boolean;
 }
@@ -54,6 +78,12 @@ export interface FirebaseServicesAndUser {
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
+  role: UserRole;
+  effectiveRole: UserRole;
+  roleLoading: boolean;
+  permissions: RolePermissions;
+  isImpersonating: boolean;
+  impersonate: (role: UserRole | null) => void;
   isAdmin: boolean;
   isAdminLoading: boolean;
 }
@@ -62,14 +92,26 @@ export interface UserHookResult {
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
+  role: UserRole;
+  effectiveRole: UserRole;
+  roleLoading: boolean;
+  permissions: RolePermissions;
+  isImpersonating: boolean;
+  impersonate: (role: UserRole | null) => void;
   isAdmin: boolean;
   isAdminLoading: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// Context
+// ---------------------------------------------------------------------------
 export const FirebaseContext = createContext<FirebaseContextState | undefined>(
   undefined
 );
 
+// ---------------------------------------------------------------------------
+// Provider
+// ---------------------------------------------------------------------------
 export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   children,
   firebaseApp,
@@ -77,6 +119,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   auth,
   storage,
 }) => {
+  // -- Auth state --
   const [userAuthState, setUserAuthState] = useState<UserAuthState>({
     user: null,
     isUserLoading: true,
@@ -123,10 +166,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         }
       },
       (error) => {
-        console.error(
-          'FirebaseProvider: onAuthStateChanged error:',
-          error
-        );
+        console.error('FirebaseProvider: onAuthStateChanged error:', error);
         setUserAuthState({
           user: null,
           isUserLoading: false,
@@ -137,49 +177,109 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     return () => unsubscribe();
   }, [auth]);
 
-  const [isDynamicAdmin, setIsDynamicAdmin] = useState(false);
-  const [isDynamicAdminLoading, setIsDynamicAdminLoading] = useState(true);
+  // -- Determine real role --
+  // 1) Super-admin emails → 'admin'
+  // 2) Document at roles/{userId} with field `role` → that role
+  // 3) Document at roles_admin/{userId} exists → 'admin' (legacy compat)
+  // 4) Default → 'representante'
 
   const isSuperAdmin = useMemo(() => {
     if (!userAuthState.user?.email) return false;
     return SUPER_ADMIN_EMAILS.includes(userAuthState.user.email);
   }, [userAuthState.user]);
 
+  const [firestoreRole, setFirestoreRole] = useState<UserRole | null>(null);
+  const [roleDocLoading, setRoleDocLoading] = useState(true);
+
   useEffect(() => {
     if (!firestore || !userAuthState.user?.uid) {
-      setIsDynamicAdmin(false);
-      setIsDynamicAdminLoading(false);
+      setFirestoreRole(null);
+      setRoleDocLoading(false);
       return;
     }
 
     if (isSuperAdmin) {
-      setIsDynamicAdmin(false);
-      setIsDynamicAdminLoading(false);
+      // No need to check Firestore for super-admins
+      setFirestoreRole(null);
+      setRoleDocLoading(false);
       return;
     }
 
-    setIsDynamicAdminLoading(true);
-    const adminDocRef = doc(firestore, 'roles_admin', userAuthState.user.uid);
+    setRoleDocLoading(true);
 
-    const unsubscribe = onSnapshot(
-      adminDocRef,
-      (docSnapshot) => {
-        setIsDynamicAdmin(docSnapshot.exists());
-        setIsDynamicAdminLoading(false);
+    // Listen to roles/{userId} for the role field
+    const roleDocRef = doc(firestore, 'roles', userAuthState.user.uid);
+    const unsub1 = onSnapshot(
+      roleDocRef,
+      (snap) => {
+        if (snap.exists() && snap.data()?.role) {
+          setFirestoreRole(snap.data().role as UserRole);
+        } else {
+          setFirestoreRole(null);
+        }
+        setRoleDocLoading(false);
       },
       (error) => {
-        console.error('Error checking admin status:', error);
-        setIsDynamicAdmin(false);
-        setIsDynamicAdminLoading(false);
+        console.error('Error checking role doc:', error);
+        // Fallback: check legacy roles_admin collection
+        const adminDocRef = doc(
+          firestore,
+          'roles_admin',
+          userAuthState.user!.uid
+        );
+        const unsub2 = onSnapshot(
+          adminDocRef,
+          (adminSnap) => {
+            if (adminSnap.exists()) {
+              setFirestoreRole('admin');
+            } else {
+              setFirestoreRole(null);
+            }
+            setRoleDocLoading(false);
+          },
+          () => {
+            setFirestoreRole(null);
+            setRoleDocLoading(false);
+          }
+        );
+        return unsub2;
       }
     );
 
-    return () => unsubscribe();
+    return () => unsub1();
   }, [firestore, userAuthState.user?.uid, isSuperAdmin]);
 
-  const isAdmin = isSuperAdmin || isDynamicAdmin;
-  const isAdminLoading = userAuthState.isUserLoading || isDynamicAdminLoading;
+  // Final resolved role
+  const realRole: UserRole = isSuperAdmin
+    ? 'admin'
+    : firestoreRole ?? 'representante';
+  const roleLoading = userAuthState.isUserLoading || roleDocLoading;
 
+  // -- Impersonation (admin only) --
+  const [impersonatedRole, setImpersonatedRole] = useState<UserRole | null>(
+    null
+  );
+
+  const impersonate = useCallback(
+    (role: UserRole | null) => {
+      if (realRole !== 'admin') {
+        console.warn('Only admins can impersonate roles');
+        return;
+      }
+      setImpersonatedRole(role);
+    },
+    [realRole]
+  );
+
+  const effectiveRole = impersonatedRole ?? realRole;
+  const isImpersonating = impersonatedRole !== null;
+  const permissions = getPermissions(effectiveRole);
+
+  // Backwards-compat
+  const isAdmin = realRole === 'admin';
+  const isAdminLoading = roleLoading;
+
+  // -- Context value --
   const contextValue = useMemo(
     (): FirebaseContextState => {
       const servicesAvailable = !!(
@@ -197,11 +297,31 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         user: userAuthState.user,
         isUserLoading: userAuthState.isUserLoading,
         userError: userAuthState.userError,
+        role: realRole,
+        effectiveRole,
+        roleLoading,
+        permissions,
+        isImpersonating,
+        impersonate,
         isAdmin,
         isAdminLoading,
       };
     },
-    [firebaseApp, firestore, auth, storage, userAuthState, isAdmin, isAdminLoading]
+    [
+      firebaseApp,
+      firestore,
+      auth,
+      storage,
+      userAuthState,
+      realRole,
+      effectiveRole,
+      roleLoading,
+      permissions,
+      isImpersonating,
+      impersonate,
+      isAdmin,
+      isAdminLoading,
+    ]
   );
 
   return (
@@ -211,6 +331,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   );
 };
 
+// ---------------------------------------------------------------------------
+// Hooks
+// ---------------------------------------------------------------------------
 export const useFirebase = (): FirebaseServicesAndUser => {
   const context = useContext(FirebaseContext);
 
@@ -227,6 +350,12 @@ export const useFirebase = (): FirebaseServicesAndUser => {
       user: null,
       isUserLoading: true,
       userError: null,
+      role: 'representante',
+      effectiveRole: 'representante',
+      roleLoading: true,
+      permissions: ROLE_PERMISSIONS.representante,
+      isImpersonating: false,
+      impersonate: () => {},
       isAdmin: false,
       isAdminLoading: true,
     };
@@ -240,6 +369,12 @@ export const useFirebase = (): FirebaseServicesAndUser => {
     user: context.user,
     isUserLoading: context.isUserLoading,
     userError: context.userError,
+    role: context.role,
+    effectiveRole: context.effectiveRole,
+    roleLoading: context.roleLoading,
+    permissions: context.permissions,
+    isImpersonating: context.isImpersonating,
+    impersonate: context.impersonate,
     isAdmin: context.isAdmin,
     isAdminLoading: context.isAdminLoading,
   };
@@ -280,7 +415,30 @@ export function useMemoFirebase<T>(
 }
 
 export const useUser = (): UserHookResult => {
-  const { user, isUserLoading, userError, isAdmin, isAdminLoading } =
-    useFirebase();
-  return { user, isUserLoading, userError, isAdmin, isAdminLoading };
+  const {
+    user,
+    isUserLoading,
+    userError,
+    role,
+    effectiveRole,
+    roleLoading,
+    permissions,
+    isImpersonating,
+    impersonate,
+    isAdmin,
+    isAdminLoading,
+  } = useFirebase();
+  return {
+    user,
+    isUserLoading,
+    userError,
+    role,
+    effectiveRole,
+    roleLoading,
+    permissions,
+    isImpersonating,
+    impersonate,
+    isAdmin,
+    isAdminLoading,
+  };
 };

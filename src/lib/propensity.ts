@@ -4,12 +4,12 @@ import { INTERACTION_WEIGHTS } from './constants';
 /**
  * Calculate propensity score (1-5) from a list of interactions.
  *
- * Algorithm: weighted average of the last N interactions' result codes,
- * mapped to a 1-5 scale.
+ * Algorithm: weighted average of the last N interactions' result codes.
+ * Result codes already range 1-5, matching propensity scale directly.
  *
- * - Result codes range from 1 (Não Receptivo) to 7 (Evangelizando)
+ * - Result codes: 1 (Não) to 5 (Prescrevendo)
  * - Each interaction type has a weight (field_visit=1.0, clinical_event=1.5, etc.)
- * - The weighted average is mapped: 1-7 → 1-5
+ * - The weighted average is rounded to nearest integer
  */
 export function calculatePropensity(
   interactions: Pick<Interaction, 'type' | 'resultCode'>[],
@@ -30,10 +30,7 @@ export function calculatePropensity(
 
   if (totalWeight === 0) return 1;
 
-  const weightedAvg = weightedSum / totalWeight;
-
-  // Map 1-7 range to 1-5 range
-  const score = Math.round(((weightedAvg - 1) / 6) * 4 + 1);
+  const score = Math.round(weightedSum / totalWeight);
 
   return Math.max(1, Math.min(5, score));
 }

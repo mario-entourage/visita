@@ -1,12 +1,18 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert, Platform } from 'react-native';
 import { useAuth, useUser } from '@/firebase/provider';
+import { ROLE_LABELS, ROLE_COLORS } from '@/types/roles';
+import { C } from '@/theme';
 
 export default function ProfileScreen() {
   const auth = useAuth();
-  const { user, isAdmin } = useUser();
+  const { user, role, effectiveRole, isImpersonating } = useUser();
 
   const handleSignOut = () => {
+    if (Platform.OS === 'web') {
+      auth.signOut();
+      return;
+    }
     Alert.alert('Sair', 'Deseja realmente sair?', [
       { text: 'Cancelar', style: 'cancel' },
       {
@@ -17,10 +23,12 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const roleColor = ROLE_COLORS[role];
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <View style={styles.avatar}>
+        <View style={[styles.avatar, { backgroundColor: roleColor }]}>
           <Text style={styles.avatarText}>
             {user?.displayName?.[0]?.toUpperCase() ||
               user?.email?.[0]?.toUpperCase() ||
@@ -31,11 +39,16 @@ export default function ProfileScreen() {
           {user?.displayName || 'Usuário'}
         </Text>
         <Text style={styles.email}>{user?.email || ''}</Text>
-        {isAdmin && (
-          <View style={styles.adminBadge}>
-            <Text style={styles.adminText}>Admin</Text>
-          </View>
-        )}
+        <View style={[styles.roleBadge, { backgroundColor: roleColor + '18' }]}>
+          <Text style={[styles.roleText, { color: roleColor }]}>
+            {ROLE_LABELS[role]}
+          </Text>
+        </View>
+        {isImpersonating ? (
+          <Text style={styles.impersonateNote}>
+            Simulando: {ROLE_LABELS[effectiveRole]}
+          </Text>
+        ) : null}
       </View>
 
       <Pressable style={styles.signOutButton} onPress={handleSignOut}>
@@ -48,11 +61,11 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: C.bg,
     padding: 16,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: C.card,
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -66,41 +79,45 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#3b82f6',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
   avatarText: {
-    color: '#fff',
+    color: C.white,
     fontSize: 24,
     fontWeight: '700',
   },
   name: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: C.text,
   },
   email: {
     fontSize: 14,
-    color: '#6b7280',
+    color: C.textMuted,
     marginTop: 4,
   },
-  adminBadge: {
-    marginTop: 8,
-    backgroundColor: '#fef3c7',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+  roleBadge: {
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 16,
   },
-  adminText: {
-    color: '#92400e',
+  roleText: {
     fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  impersonateNote: {
+    marginTop: 6,
+    fontSize: 11,
+    color: C.amber,
     fontWeight: '600',
   },
   signOutButton: {
     marginTop: 24,
-    backgroundColor: '#fff',
+    backgroundColor: C.card,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -108,7 +125,7 @@ const styles = StyleSheet.create({
     borderColor: '#fecaca',
   },
   signOutText: {
-    color: '#ef4444',
+    color: C.red,
     fontSize: 16,
     fontWeight: '500',
   },

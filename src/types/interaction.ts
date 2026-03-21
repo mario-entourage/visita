@@ -11,7 +11,7 @@ export interface Interaction {
   doctorId: string;
   repId: string;
   type: InteractionType;
-  resultCode: number; // 1-7
+  resultCode: number; // 1-5
   samplesDelivered: boolean;
   spokeFaceToFace: boolean;
   followUpScheduled: boolean;

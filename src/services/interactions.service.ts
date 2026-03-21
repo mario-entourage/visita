@@ -6,6 +6,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   serverTimestamp,
   Firestore,
   Query,
@@ -66,26 +67,32 @@ export async function softDeleteInteraction(
 // Queries
 // ---------------------------------------------------------------------------
 
+/** Last N interactions for a doctor's timeline. Default cap: 20. */
 export function getInteractionsByDoctorQuery(
   db: Firestore,
-  doctorId: string
+  doctorId: string,
+  cap = 20
 ): Query {
   return query(
     getInteractionsRef(db),
     where('doctorId', '==', doctorId),
     where('active', '==', true),
-    orderBy('createdAt', 'desc')
+    orderBy('createdAt', 'desc'),
+    limit(cap)
   );
 }
 
+/** Last N interactions for a rep's activity history. Default cap: 30. */
 export function getInteractionsByRepQuery(
   db: Firestore,
-  repId: string
+  repId: string,
+  cap = 30
 ): Query {
   return query(
     getInteractionsRef(db),
     where('repId', '==', repId),
     where('active', '==', true),
-    orderBy('createdAt', 'desc')
+    orderBy('createdAt', 'desc'),
+    limit(cap)
   );
 }

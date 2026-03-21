@@ -23,24 +23,24 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
           <Text style={styles.specialty}>
             {doctor.mainSpecialty || 'Sem especialidade'}
           </Text>
-          {doctor.city && doctor.state && (
+          {doctor.city && doctor.state ? (
             <Text style={styles.location}>
               {doctor.city}, {doctor.state}
             </Text>
-          )}
-          {doctor.lastInteractionAt && (
+          ) : null}
+          {doctor.lastInteractionAt ? (
             <Text style={styles.lastVisit}>
               Última visita: {formatRelativeTime(doctor.lastInteractionAt)}
             </Text>
-          )}
+          ) : null}
         </View>
         <View style={styles.badge}>
           <PropensityBadge score={doctor.propensityScore} />
-          {doctor.totalTouches != null && (
+          {doctor.totalTouches != null ? (
             <Text style={styles.touches}>
               {doctor.totalTouches} {doctor.totalTouches === 1 ? 'toque' : 'toques'}
             </Text>
-          )}
+          ) : null}
         </View>
       </View>
     </Pressable>

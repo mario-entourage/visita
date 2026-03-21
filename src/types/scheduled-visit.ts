@@ -6,6 +6,8 @@ export type VisitStatus =
   | 'cancelled'
   | 'rescheduled';
 
+export type VisitSource = 'manual' | 'google_sync' | 'manager_assigned';
+
 export interface ScheduledVisit {
   id: string;
   doctorId: string;
@@ -19,4 +21,6 @@ export interface ScheduledVisit {
   active: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  googleCalendarEventId?: string; // Links back to Google Calendar event
+  source?: VisitSource;
 }

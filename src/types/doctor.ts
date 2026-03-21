@@ -24,7 +24,16 @@ export interface Doctor {
   // CRM augmentation fields (written by CRM, ignored by Sales Integration)
   propensityScore?: number; // 1-5
   lastInteractionAt?: Timestamp;
-  lastInteractionResult?: number; // 1-7
+  lastInteractionResult?: number; // 1-5
   totalTouches?: number;
   flaggedForFollowUp?: boolean;
+  source?: 'import' | 'field_entry';
+  createdByRepId?: string;
+  assignedRepId?: string;
+
+  // Doctor-not-at-address report (set by rep in the field)
+  reported?: boolean;
+  reportedAt?: Timestamp;
+  reportedBy?: string;       // repId who reported
+  reportedReason?: 'address_nonexistent' | 'org_not_there' | 'org_there_doctor_redirected' | 'org_there_unknown';
 }

@@ -7,6 +7,8 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  getDocs,
+  Timestamp,
   Firestore,
   Query,
 } from 'firebase/firestore';
@@ -89,4 +91,86 @@ export function getVisitsByDoctorQuery(
     where('active', '==', true),
     orderBy('scheduledFor', 'desc')
   );
+}
+
+// ---------------------------------------------------------------------------
+// Calendar sync helpers
+// ---------------------------------------------------------------------------
+
+/** Query visits for a rep within a date range. */
+export function getVisitsByWeekQuery(
+  db: Firestore,
+  repId: string,
+  start: Date,
+  end: Date
+): Query {
+  return query(
+    getVisitsRef(db),
+    where('repId', '==', repId),
+    where('active', '==', true),
+    where('scheduledFor', '>=', Timestamp.fromDate(start)),
+    where('scheduledFor', '<=', Timestamp.fromDate(end)),
+    orderBy('scheduledFor', 'asc')
+  );
+}
+
+/** Check if a visit already exists for a doctor on a specific day (dedup). */
+export async function visitExistsForDoctorOnDate(
+  db: Firestore,
+  repId: string,
+  doctorId: string,
+  date: Date
+): Promise<boolean> {
+  const dayStart = new Date(date);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(date);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const q = query(
+    getVisitsRef(db),
+    where('repId', '==', repId),
+    where('doctorId', '==', doctorId),
+    where('active', '==', true),
+    where('scheduledFor', '>=', Timestamp.fromDate(dayStart)),
+    where('scheduledFor', '<=', Timestamp.fromDate(dayEnd))
+  );
+
+  const snap = await getDocs(q);
+  return !snap.empty;
+}
+
+/** Check if a visit with this Google Calendar event ID already exists. */
+export async function visitExistsForCalendarEvent(
+  db: Firestore,
+  repId: string,
+  googleCalendarEventId: string
+): Promise<boolean> {
+  const q = query(
+    getVisitsRef(db),
+    where('repId', '==', repId),
+    where('googleCalendarEventId', '==', googleCalendarEventId),
+    where('active', '==', true)
+  );
+
+  const snap = await getDocs(q);
+  return !snap.empty;
+}
+
+/** Create multiple visits in parallel (much faster than sequential). */
+export async function bulkCreateVisits(
+  db: Firestore,
+  visits: Array<Omit<ScheduledVisit, 'id' | 'createdAt' | 'updatedAt'>>
+): Promise<string[]> {
+  return Promise.all(visits.map((v) => createVisit(db, v)));
+}
+
+/** Mark a visit as synced to Google Calendar. */
+export async function markVisitSynced(
+  db: Firestore,
+  visitId: string,
+  googleCalendarEventId: string
+): Promise<void> {
+  await updateVisit(db, visitId, {
+    googleCalendarEventId,
+  });
 }
