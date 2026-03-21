@@ -12,7 +12,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { INTERACTION_TYPE_LABELS, RESULT_LABELS } from '@/lib/constants';
-import { C, RESULT_COLORS } from '@/theme';
+import { C, RESULT_COLORS , S } from '@/theme';
 import type { InteractionType } from '@/types/interaction';
 
 const interactionSchema = z.object({
@@ -241,11 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.card,
     borderRadius: 12,
     padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   chipRow: {
     flexDirection: 'row',

@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import type { Doctor } from '@/types/doctor';
 import { PropensityBadge } from './PropensityBadge';
 import { formatRelativeTime } from '@/lib/utils';
+import { C, S } from '@/theme';
 
 interface DoctorCardProps {
   doctor: Doctor & { id: string };
@@ -54,11 +55,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginVertical: 4,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    ...S.card,
   },
   row: {
     flexDirection: 'row',

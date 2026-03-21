@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { C } from '@/theme';
+import { C, S } from '@/theme';
 import {
   getGoalForWeek,
   setGoalForWeek,
@@ -172,11 +172,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   row: {
     flexDirection: 'row',

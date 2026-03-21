@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet, Alert, Platform } from 'react-native';
 import { useAuth, useUser } from '@/firebase/provider';
 import { ROLE_LABELS, ROLE_COLORS } from '@/types/roles';
-import { C } from '@/theme';
+import { C, S } from '@/theme';
 
 export default function ProfileScreen() {
   const auth = useAuth();
@@ -69,11 +69,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    ...S.card,
   },
   avatar: {
     width: 64,

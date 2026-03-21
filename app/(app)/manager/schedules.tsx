@@ -15,7 +15,7 @@ import { getActiveRepsQuery } from '@/services/reps.service';
 import { getUpcomingVisitsQuery } from '@/services/visits.service';
 import { WeeklyGoalEditor } from '@/components/WeeklyGoalEditor';
 import { formatTimestamp } from '@/lib/utils';
-import { C } from '@/theme';
+import { C, S } from '@/theme';
 import type { Representante } from '@/types/representante';
 import type { ScheduledVisit } from '@/types/scheduled-visit';
 
@@ -211,11 +211,7 @@ const styles = StyleSheet.create({
     marginVertical: 3,
     borderRadius: 12,
     padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   cardContent: {
     flex: 1,

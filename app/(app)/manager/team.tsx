@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { useCollection } from '@/firebase/use-collection';
 import { getActiveRepsQuery } from '@/services/reps.service';
-import { C } from '@/theme';
+import { C, S } from '@/theme';
 import type { Representante } from '@/types/representante';
 
 // Assign a color to each rep based on index
@@ -119,11 +119,7 @@ const styles = StyleSheet.create({
     marginVertical: 3,
     borderRadius: 12,
     padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   repBadge: {
     width: 40,

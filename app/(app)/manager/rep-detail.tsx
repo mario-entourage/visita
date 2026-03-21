@@ -12,7 +12,7 @@ import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { useCollection } from '@/firebase/use-collection';
 import { getInteractionsByRepQuery } from '@/services/interactions.service';
 import { Timeline } from '@/components/Timeline';
-import { C } from '@/theme';
+import { C, S } from '@/theme';
 import type { Interaction } from '@/types/interaction';
 
 export default function RepDetailScreen() {
@@ -124,11 +124,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   statValue: {
     fontSize: 22,

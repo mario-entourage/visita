@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const C = {
   tealDark: '#0d6e6e',
   teal: '#0d6e6e',
@@ -15,6 +17,35 @@ export const C = {
   amberLight: '#fef3c7',
   border: '#e5e7eb',
   white: '#ffffff',
+};
+
+// ---------------------------------------------------------------------------
+// Cross-platform shadows (avoids React Native Web deprecation warnings)
+// Usage: spread into StyleSheet.create → `...S.card`
+// ---------------------------------------------------------------------------
+export const S = {
+  /** Subtle card shadow — used on almost every card in the app */
+  card: Platform.select({
+    web: { boxShadow: '0 1px 3px rgba(0,0,0,0.06)' } as object,
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 3,
+      elevation: 1,
+    },
+  })!,
+  /** Stronger shadow — used on the home hub buttons */
+  lifted: Platform.select({
+    web: { boxShadow: '0 4px 10px rgba(0,0,0,0.2)' } as object,
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+  })!,
 };
 
 // Result code colors: 1 (red/negative) → 5 (teal/prescribing)

@@ -44,7 +44,7 @@ import { useCalendarAuth } from '@/hooks/use-calendar-auth';
 import { SyncModal, type SyncDirection, type SyncWeek } from '@/components/SyncModal';
 import { SyncReviewList, type ReviewItem } from '@/components/SyncReviewList';
 import { formatTimestamp } from '@/lib/utils';
-import { C, RESULT_COLORS } from '@/theme';
+import { C, RESULT_COLORS , S } from '@/theme';
 import { RESULT_LABELS, INTERACTION_TYPE_LABELS } from '@/lib/constants';
 import type { ScheduledVisit } from '@/types/scheduled-visit';
 import type { Interaction } from '@/types/interaction';
@@ -474,11 +474,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
     gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   syncBarText: {
     flex: 1,
@@ -493,11 +489,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   iconWrap: {
     width: 40,

@@ -16,7 +16,7 @@ import {
   ROLE_LABELS,
   ROLE_COLORS,
 } from '@/types/roles';
-import { C } from '@/theme';
+import { C, S } from '@/theme';
 
 // ---------------------------------------------------------------------------
 // Hub button definitions per effective role
@@ -306,11 +306,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.card,
     borderRadius: 16,
     padding: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
+    ...S.lifted,
   },
   hubButtonPressed: {
     opacity: 0.88,

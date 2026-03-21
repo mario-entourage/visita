@@ -32,7 +32,7 @@ import { getActiveRepsQuery } from '@/services/reps.service';
 import { AssignRepDropdown } from '@/components/AssignRepDropdown';
 import { PropensityBadge } from '@/components/PropensityBadge';
 import { Timeline } from '@/components/Timeline';
-import { C } from '@/theme';
+import { C, S } from '@/theme';
 import { RESULT_LABELS } from '@/lib/constants';
 import type { Doctor } from '@/types/doctor';
 import type { Interaction } from '@/types/interaction';
@@ -52,7 +52,21 @@ export default function DoctorDetailScreen() {
   const [selectedReason, setSelectedReason] = useState<ReportReason | null>(null);
   const [isReporting, setIsReporting] = useState(false);
 
-  // Load reps + all doctors for assignment dropdown (manager only)
+  // Load the doctor document first — other queries depend on it
+  const doctorRef = useMemoFirebase(
+    () => (db && id ? doc(db, 'doctors', id) : null),
+    [db, id]
+  );
+  const { data: doctor, isLoading: doctorLoading } = useDoc<Doctor>(doctorRef);
+
+  const interactionsQuery = useMemoFirebase(
+    () => (db && id ? getInteractionsByDoctorQuery(db, id) : null),
+    [db, id]
+  );
+  const { data: interactions, isLoading: interactionsLoading } =
+    useCollection<Interaction>(interactionsQuery);
+
+  // Load reps for the assignment dropdown (manager only)
   const repsQuery = useMemoFirebase(
     () => (db && isManager ? getActiveRepsQuery(db) : null),
     [db, isManager]
@@ -92,7 +106,7 @@ export default function DoctorDetailScreen() {
         repName,
       },
     });
-  }, [id, router]);
+  }, [id, router, doctor]);
 
   const handleReport = useCallback(async () => {
     if (!db || !id || !user || !doctor || !selectedReason) return;
@@ -124,21 +138,6 @@ export default function DoctorDetailScreen() {
       setIsReporting(false);
     }
   }, [db, id, user, doctor, selectedReason]);
-
-  const doctorRef = useMemoFirebase(
-    () => (db && id ? doc(db, 'doctors', id) : null),
-    [db, id]
-  );
-
-  const { data: doctor, isLoading: doctorLoading } = useDoc<Doctor>(doctorRef);
-
-  const interactionsQuery = useMemoFirebase(
-    () => (db && id ? getInteractionsByDoctorQuery(db, id) : null),
-    [db, id]
-  );
-
-  const { data: interactions, isLoading: interactionsLoading } =
-    useCollection<Interaction>(interactionsQuery);
 
   if (doctorLoading) {
     return (
@@ -312,7 +311,7 @@ export default function DoctorDetailScreen() {
             <AssignRepDropdown
               reps={reps}
               doctors={allDoctors}
-              currentDoctor={{ id: id!, ...doctor }}
+              currentDoctor={{ ...doctor, id: id! }}
               currentRepId={doctor.assignedRepId}
               onAssign={handleAssignRep}
               expanded={dropdownOpen}
@@ -532,11 +531,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.card,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -583,11 +578,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.card,
     borderRadius: 12,
     padding: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    ...S.card,
   },
   contactRow: {
     flexDirection: 'row',
