@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   GoogleAuthProvider,
@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth';
 import { useAuth, useUser } from '@/firebase/provider';
 import { useFonts, ProtestStrike_400Regular } from '@expo-google-fonts/protest-strike';
+import { Ionicons } from '@expo/vector-icons';
 
 // Only import expo-auth-session on native
 let Google: typeof import('expo-auth-session/providers/google') | null = null;
@@ -86,12 +87,10 @@ export default function LoginScreen() {
     setIsSigningIn(true);
     try {
       if (Platform.OS === 'web') {
-        // Web: use Firebase's built-in signInWithPopup
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ hd: 'entouragelab.com' });
         await signInWithPopup(auth, provider, browserPopupRedirectResolver);
       } else {
-        // Native: use expo-auth-session
         if (!request) {
           Alert.alert(
             'Erro',
@@ -101,7 +100,6 @@ export default function LoginScreen() {
           return;
         }
         await promptAsync();
-        // signInWithCredential happens in the useEffect above
         return;
       }
     } catch (err: any) {
@@ -118,8 +116,14 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={[styles.title, fontsLoaded && { fontFamily: 'ProtestStrike_400Regular' }]}>VISITAS</Text>
-        <Text style={styles.subtitle}>CRM Farmacêutico</Text>
+        <Image
+          source={require('../../assets/entourage-logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={[styles.title, fontsLoaded && { fontFamily: 'ProtestStrike_400Regular' }]}>
+          VISITAS
+        </Text>
       </View>
 
       <Pressable
@@ -127,6 +131,9 @@ export default function LoginScreen() {
         onPress={handleLogin}
         disabled={isSigningIn}
       >
+        {!isSigningIn && (
+          <Ionicons name="logo-google" size={18} color="#fff" style={styles.buttonIcon} />
+        )}
         <Text style={styles.buttonText}>
           {isSigningIn ? 'Entrando...' : 'Entrar com Google'}
         </Text>
@@ -151,17 +158,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 48,
   },
+  logo: {
+    width: 72,
+    height: 72,
+    marginBottom: 16,
+  },
   title: {
     fontSize: 18,
     color: '#ffffff',
     letterSpacing: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.55)',
-    marginTop: 6,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
   },
   button: {
     backgroundColor: '#14b8a6',
@@ -170,9 +175,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     width: '100%',
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   buttonDisabled: {
     opacity: 0.6,
+  },
+  buttonIcon: {
+    marginRight: 10,
   },
   buttonText: {
     color: '#fff',
