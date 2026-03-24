@@ -121,7 +121,7 @@ export default function LoginScreen() {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={[styles.title, fontsLoaded && { fontFamily: 'ProtestStrike_400Regular' }]}>
+        <Text style={[styles.title, { fontFamily: fontsLoaded ? 'ProtestStrike_400Regular' : 'Protest Strike' }]}>
           VISITAS
         </Text>
       </View>
