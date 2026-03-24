@@ -40,7 +40,7 @@ VISITA is a tool for people who spend most of their day in waiting rooms and hos
 
 | Element            | Value                                                    |
 |--------------------|----------------------------------------------------------|
-| App name           | VISITA                                                   |
+| App name           | VISITAS                                                  |
 | Tagline            | CRM Farmacêutico                                         |
 | Primary color      | Teal `#0d9488` (C.teal)                                  |
 | Dark accent        | `#134e4a` (C.tealDark)                                   |
@@ -50,7 +50,8 @@ VISITA is a tool for people who spend most of their day in waiting rooms and hos
 | Text               | `#111827` (C.text)                                       |
 | Muted text         | `#6b7280` (C.textMuted)                                  |
 | Light text         | `#9ca3af` (C.textLight)                                  |
-| Font               | System default (San Francisco on iOS, Roboto on Android) |
+| App name font      | Protest Strike (Google Fonts), 18pt, login screen only   |
+| Body font          | System default (San Francisco on iOS, Roboto on Android) |
 | Icon set           | Ionicons via `@expo/vector-icons`                        |
 | Border radius      | 12px on cards, 20px on chips                             |
 

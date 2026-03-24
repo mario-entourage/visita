@@ -8,6 +8,7 @@ import {
   browserPopupRedirectResolver,
 } from 'firebase/auth';
 import { useAuth, useUser } from '@/firebase/provider';
+import { useFonts, ProtestStrike_400Regular } from '@expo-google-fonts/protest-strike';
 
 // Only import expo-auth-session on native
 let Google: typeof import('expo-auth-session/providers/google') | null = null;
@@ -39,6 +40,7 @@ export default function LoginScreen() {
   const { user } = useUser();
   const router = useRouter();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [fontsLoaded] = useFonts({ ProtestStrike_400Regular });
 
   // Native-only Google auth hook
   const { request, response, promptAsync } = useNativeGoogleAuth();
@@ -116,7 +118,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>VISITA</Text>
+        <Text style={[styles.title, fontsLoaded && { fontFamily: 'ProtestStrike_400Regular' }]}>VISITAS</Text>
         <Text style={styles.subtitle}>CRM Farmacêutico</Text>
       </View>
 
@@ -150,10 +152,9 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   title: {
-    fontSize: 42,
-    fontWeight: '800',
+    fontSize: 18,
     color: '#ffffff',
-    letterSpacing: 8,
+    letterSpacing: 4,
   },
   subtitle: {
     fontSize: 13,
