@@ -117,7 +117,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Image
-          source={require('../../assets/entourage-logo.png')}
+          source={require('../../assets/entourage-logo-white.png')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -159,9 +159,9 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   logo: {
-    width: 72,
-    height: 72,
-    marginBottom: 16,
+    width: 200,
+    height: 46,
+    marginBottom: 20,
   },
   title: {
     fontSize: 18,
