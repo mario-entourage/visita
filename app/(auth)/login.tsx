@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 36,
     color: '#ffffff',
     letterSpacing: 4,
   },
