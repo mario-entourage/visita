@@ -174,7 +174,6 @@ export default function HomeScreen() {
               </View>
             ) : null}
             <Text style={styles.logoText}>VISITA</Text>
-            <Text style={styles.logoSub}>CRM Farmacêutico</Text>
           </View>
 
           {/* Hub buttons */}
