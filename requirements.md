@@ -41,7 +41,6 @@ VISITA is a tool for people who spend most of their day in waiting rooms and hos
 | Element            | Value                                                    |
 |--------------------|----------------------------------------------------------|
 | App name           | VISITAS                                                  |
-| Tagline            | CRM Farmacêutico                                         |
 | Primary color      | Teal `#0d9488` (C.teal)                                  |
 | Dark accent        | `#134e4a` (C.tealDark)                                   |
 | Light accent       | `#99f6e4` (C.tealLight)                                  |
