@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,17 +6,31 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Ionicons } from '@expo/vector-icons';
 import { RESULT_LABELS } from '@/lib/constants';
+import { formatTimestamp } from '@/lib/utils';
 import { C, RESULT_COLORS, S } from '@/theme';
+import type { Doctor } from '@/types/doctor';
+import type { Interaction } from '@/types/interaction';
 
 const interactionSchema = z.object({
   preVisitNotes: z.string(),
   resultCode: z.number().min(1).max(5),
   postVisitNotes: z.string(),
+  // Extended detail fields
+  isPrescriber: z.boolean().optional(),
+  prescribedProducts: z.string().optional(),
+  prescriptionType: z.enum(['rdc660', 'pharmacy']).optional(),
+  reasonTherapeutic: z.boolean().optional(),
+  reasonDelivery: z.boolean().optional(),
+  reasonPracticality: z.boolean().optional(),
+  reasonCost: z.boolean().optional(),
+  reasonOther: z.string().optional(),
 });
 
 export type InteractionFormValues = z.infer<typeof interactionSchema>;
@@ -24,6 +38,8 @@ export type InteractionFormValues = z.infer<typeof interactionSchema>;
 interface InteractionFormProps {
   onSubmit: (data: InteractionFormValues) => void;
   isSubmitting?: boolean;
+  doctor?: Doctor & { id: string };
+  lastInteraction?: Interaction;
 }
 
 const RESULTS = Object.entries(RESULT_LABELS).map(([k, v]) => ({
@@ -31,10 +47,18 @@ const RESULTS = Object.entries(RESULT_LABELS).map(([k, v]) => ({
   label: v,
 }));
 
-export function InteractionForm({ onSubmit, isSubmitting }: InteractionFormProps) {
+export function InteractionForm({
+  onSubmit,
+  isSubmitting,
+  doctor,
+  lastInteraction,
+}: InteractionFormProps) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<InteractionFormValues>({
     resolver: zodResolver(interactionSchema),
@@ -42,11 +66,56 @@ export function InteractionForm({ onSubmit, isSubmitting }: InteractionFormProps
       preVisitNotes: '',
       resultCode: 3,
       postVisitNotes: '',
+      isPrescriber: false,
+      prescribedProducts: '',
+      prescriptionType: undefined,
+      reasonTherapeutic: false,
+      reasonDelivery: false,
+      reasonPracticality: false,
+      reasonCost: false,
+      reasonOther: '',
     },
   });
 
+  const isPrescriber = watch('isPrescriber');
+
+  // Build the hint text for the dialogue box
+  function buildHint(): { label: string; body: string } | null {
+    if (lastInteraction) {
+      const resultLabel = RESULT_LABELS[lastInteraction.resultCode] ?? `Código ${lastInteraction.resultCode}`;
+      const dateStr = formatTimestamp(lastInteraction.createdAt, 'dd/MM/yyyy');
+      const notes = lastInteraction.postVisitNotes || lastInteraction.notes;
+      const label = `Última visita (${dateStr}) · ${resultLabel}`;
+      const body = notes
+        ? notes
+        : 'Sem notas da última visita.';
+      return { label, body };
+    }
+    if (doctor) {
+      const specialty = doctor.mainSpecialty ?? 'Sem especialidade registrada';
+      return {
+        label: `Primeira visita · ${specialty}`,
+        body: 'Nenhuma interação anterior. Apresente os produtos e mapeie o perfil do prescritor.',
+      };
+    }
+    return null;
+  }
+
+  const hint = buildHint();
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+
+      {/* Hint dialogue box */}
+      {hint ? (
+        <View style={styles.hintBox}>
+          <View style={styles.hintHeader}>
+            <Ionicons name="chatbubble-ellipses-outline" size={14} color={C.teal} />
+            <Text style={styles.hintLabel}>{hint.label}</Text>
+          </View>
+          <Text style={styles.hintBody}>{hint.body}</Text>
+        </View>
+      ) : null}
 
       {/* Pre-visit notes */}
       <View style={styles.section}>
@@ -147,6 +216,185 @@ export function InteractionForm({ onSubmit, isSubmitting }: InteractionFormProps
         </Text>
       </Pressable>
 
+      {/* Collapsible details section */}
+      <Pressable
+        style={styles.detailsToggle}
+        onPress={() => setDetailsOpen((o) => !o)}
+      >
+        <Text style={styles.detailsToggleText}>Mais detalhes</Text>
+        <Ionicons
+          name={detailsOpen ? 'chevron-up' : 'chevron-down'}
+          size={16}
+          color={C.textMuted}
+        />
+      </Pressable>
+
+      {detailsOpen ? (
+        <View style={styles.detailsContent}>
+
+          {/* isPrescriber toggle */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Prescrição de Cannabis</Text>
+            <View style={[styles.card, styles.rowCard]}>
+              <Text style={styles.rowLabel}>Médico prescreve cannabis?</Text>
+              <Controller
+                control={control}
+                name="isPrescriber"
+                render={({ field: { onChange, value } }) => (
+                  <Switch
+                    value={!!value}
+                    onValueChange={onChange}
+                    trackColor={{ false: C.border, true: C.teal }}
+                    thumbColor={C.white}
+                  />
+                )}
+              />
+            </View>
+          </View>
+
+          {/* Products + prescription type — only if isPrescriber */}
+          {isPrescriber ? (
+            <>
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Produtos prescritos</Text>
+                <View style={styles.card}>
+                  <Controller
+                    control={control}
+                    name="prescribedProducts"
+                    render={({ field: { onChange, value } }) => (
+                      <TextInput
+                        style={styles.textArea}
+                        multiline
+                        numberOfLines={3}
+                        placeholder="Quais produtos o médico indicou ou prescreveu..."
+                        placeholderTextColor={C.textLight}
+                        value={value}
+                        onChangeText={onChange}
+                        textAlignVertical="top"
+                      />
+                    )}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Tipo de receita</Text>
+                <View style={styles.card}>
+                  <Controller
+                    control={control}
+                    name="prescriptionType"
+                    render={({ field: { onChange, value } }) => (
+                      <View style={styles.chipRow}>
+                        {(
+                          [
+                            { key: 'rdc660', label: 'RDC 660' },
+                            { key: 'pharmacy', label: 'Farmácia' },
+                          ] as const
+                        ).map(({ key, label }) => (
+                          <Pressable
+                            key={key}
+                            style={[
+                              styles.typeChip,
+                              value === key && styles.typeChipSelected,
+                            ]}
+                            onPress={() =>
+                              onChange(value === key ? undefined : key)
+                            }
+                          >
+                            <Text
+                              style={[
+                                styles.typeChipText,
+                                value === key && styles.typeChipTextSelected,
+                              ]}
+                            >
+                              {label}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                    )}
+                  />
+                </View>
+              </View>
+
+              {/* Prescribing reasons */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Motivos da prescrição</Text>
+                <View style={styles.card}>
+                  {(
+                    [
+                      { name: 'reasonTherapeutic', label: 'Benefício terapêutico' },
+                      { name: 'reasonDelivery', label: 'Facilidade de administração' },
+                      { name: 'reasonPracticality', label: 'Praticidade' },
+                      { name: 'reasonCost', label: 'Custo-benefício' },
+                    ] as const
+                  ).map(({ name, label }) => (
+                    <Controller
+                      key={name}
+                      control={control}
+                      name={name}
+                      render={({ field: { onChange, value } }) => (
+                        <Pressable
+                          style={styles.checkRow}
+                          onPress={() => onChange(!value)}
+                        >
+                          <View
+                            style={[
+                              styles.checkbox,
+                              value && styles.checkboxChecked,
+                            ]}
+                          >
+                            {value ? (
+                              <Ionicons name="checkmark" size={12} color={C.white} />
+                            ) : null}
+                          </View>
+                          <Text style={styles.checkLabel}>{label}</Text>
+                        </Pressable>
+                      )}
+                    />
+                  ))}
+
+                  {/* "Other" reason with free text */}
+                  <Controller
+                    control={control}
+                    name="reasonOther"
+                    render={({ field: { onChange, value } }) => (
+                      <View style={styles.reasonOtherRow}>
+                        <Pressable
+                          style={styles.checkRow}
+                          onPress={() => onChange(value ? '' : ' ')}
+                        >
+                          <View
+                            style={[
+                              styles.checkbox,
+                              !!value?.trim() && styles.checkboxChecked,
+                            ]}
+                          >
+                            {!!value?.trim() ? (
+                              <Ionicons name="checkmark" size={12} color={C.white} />
+                            ) : null}
+                          </View>
+                          <Text style={styles.checkLabel}>Outro motivo</Text>
+                        </Pressable>
+                        {!!value?.trim() ? (
+                          <TextInput
+                            style={styles.reasonOtherInput}
+                            placeholder="Descreva..."
+                            placeholderTextColor={C.textLight}
+                            value={value}
+                            onChangeText={onChange}
+                          />
+                        ) : null}
+                      </View>
+                    )}
+                  />
+                </View>
+              </View>
+            </>
+          ) : null}
+        </View>
+      ) : null}
+
     </ScrollView>
   );
 }
@@ -159,6 +407,35 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 40,
   },
+  // Hint box
+  hintBox: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    backgroundColor: '#f0fafa',
+    borderRadius: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: C.teal,
+    padding: 12,
+  },
+  hintHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  hintLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: C.teal,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  hintBody: {
+    fontSize: 13,
+    color: '#374151',
+    lineHeight: 18,
+  },
+  // Sections
   section: {
     marginTop: 16,
     paddingHorizontal: 16,
@@ -177,6 +454,18 @@ const styles = StyleSheet.create({
     padding: 14,
     ...S.card,
   },
+  rowCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  rowLabel: {
+    fontSize: 14,
+    color: C.text,
+    flex: 1,
+    marginRight: 12,
+  },
+  // Result chips
   resultGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -198,12 +487,14 @@ const styles = StyleSheet.create({
   resultChipTextSelected: {
     fontWeight: '700',
   },
+  // Text areas
   textArea: {
     fontSize: 14,
     color: C.text,
     minHeight: 90,
     textAlignVertical: 'top',
   },
+  // Submit button
   button: {
     backgroundColor: C.teal,
     marginHorizontal: 16,
@@ -219,6 +510,85 @@ const styles = StyleSheet.create({
     color: C.white,
     fontSize: 16,
     fontWeight: '700',
+  },
+  // Collapsible toggle
+  detailsToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 20,
+    paddingVertical: 10,
+  },
+  detailsToggleText: {
+    fontSize: 13,
+    color: C.textMuted,
+    fontWeight: '600',
+  },
+  detailsContent: {
+    // no extra wrapper needed; sections handle their own spacing
+  },
+  // Type chips (prescription type)
+  chipRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  typeChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    backgroundColor: C.bg,
+  },
+  typeChipSelected: {
+    borderColor: C.teal,
+    backgroundColor: '#f0fafa',
+  },
+  typeChipText: {
+    fontSize: 13,
+    color: C.textMuted,
+    fontWeight: '600',
+  },
+  typeChipTextSelected: {
+    color: C.teal,
+  },
+  // Checkboxes
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 7,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    backgroundColor: C.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: C.teal,
+    borderColor: C.teal,
+  },
+  checkLabel: {
+    fontSize: 14,
+    color: C.text,
+  },
+  reasonOtherRow: {
+    // wraps checkbox row + optional text input
+  },
+  reasonOtherInput: {
+    marginLeft: 30,
+    marginTop: 4,
+    fontSize: 13,
+    color: C.text,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
+    paddingVertical: 4,
   },
   error: {
     color: C.red,

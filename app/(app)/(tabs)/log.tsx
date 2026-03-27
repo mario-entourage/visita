@@ -19,12 +19,16 @@ import {
   getActiveDoctorsQuery,
   recordInteractionOnDoctor,
 } from '@/services/doctors.service';
-import { createInteraction } from '@/services/interactions.service';
+import {
+  createInteraction,
+  getInteractionsByDoctorQuery,
+} from '@/services/interactions.service';
 import {
   InteractionForm,
   type InteractionFormValues,
 } from '@/components/InteractionForm';
 import type { Doctor } from '@/types/doctor';
+import type { Interaction } from '@/types/interaction';
 import { C } from '@/theme';
 
 export default function LogScreen() {
@@ -39,6 +43,17 @@ export default function LogScreen() {
     [db]
   );
   const { data: doctors, isLoading } = useCollection<Doctor>(doctorsQuery);
+
+  // Load the last interaction for the selected doctor (for the hint box)
+  const lastInteractionQuery = useMemoFirebase(
+    () =>
+      db && selectedDoctor
+        ? getInteractionsByDoctorQuery(db, selectedDoctor.id, 1)
+        : null,
+    [db, selectedDoctor]
+  );
+  const { data: lastInteractions } = useCollection<Interaction>(lastInteractionQuery);
+  const lastInteraction = lastInteractions?.[0];
 
   const filtered = doctors?.filter((d) =>
     d.fullName.toLowerCase().includes(search.toLowerCase())
@@ -72,6 +87,15 @@ export default function LogScreen() {
         postVisitNotes: data.postVisitNotes || undefined,
         location,
         active: true,
+        // Extended detail fields (optional)
+        isPrescriber: data.isPrescriber ?? undefined,
+        prescribedProducts: data.prescribedProducts || undefined,
+        prescriptionType: data.prescriptionType ?? undefined,
+        reasonTherapeutic: data.reasonTherapeutic ?? undefined,
+        reasonDelivery: data.reasonDelivery ?? undefined,
+        reasonPracticality: data.reasonPracticality ?? undefined,
+        reasonCost: data.reasonCost ?? undefined,
+        reasonOther: data.reasonOther || undefined,
       });
 
       await recordInteractionOnDoctor(db, selectedDoctor.id, data.resultCode);
@@ -112,7 +136,12 @@ export default function LogScreen() {
           </Text>
           <Text style={styles.changeText}>Trocar</Text>
         </Pressable>
-        <InteractionForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <InteractionForm
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          doctor={selectedDoctor}
+          lastInteraction={lastInteraction}
+        />
       </View>
     );
   }
