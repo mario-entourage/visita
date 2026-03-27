@@ -173,7 +173,7 @@ export default function HomeScreen() {
                 </Text>
               </View>
             ) : null}
-            <Text style={styles.logoText}>VISITA</Text>
+            <Text style={styles.logoText}>VISITAS</Text>
           </View>
 
           {/* Hub buttons */}

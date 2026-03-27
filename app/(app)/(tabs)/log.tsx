@@ -52,8 +52,8 @@ export default function LogScreen() {
         : null,
     [db, selectedDoctor]
   );
-  const { data: lastInteractions } = useCollection<Interaction>(lastInteractionQuery);
-  const lastInteraction = lastInteractions?.[0];
+  const { data: lastInteractions, isLoading: isHintLoading } = useCollection<Interaction>(lastInteractionQuery);
+  const lastInteraction = lastInteractions?.[0] ?? undefined;
 
   const filtered = doctors?.filter((d) =>
     d.fullName.toLowerCase().includes(search.toLowerCase())
@@ -141,6 +141,7 @@ export default function LogScreen() {
           isSubmitting={isSubmitting}
           doctor={selectedDoctor}
           lastInteraction={lastInteraction}
+          isHintLoading={isHintLoading}
         />
       </View>
     );

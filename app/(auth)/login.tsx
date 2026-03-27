@@ -9,8 +9,7 @@ import {
 } from 'firebase/auth';
 import { useAuth, useUser } from '@/firebase/provider';
 import { useFonts, ProtestStrike_400Regular } from '@expo-google-fonts/protest-strike';
-import Svg, { Path, G, ClipPath, Rect, Defs } from 'react-native-svg';
-const GoogleIcon = require('../../assets/google-g-white.png');
+import { Ionicons } from '@expo/vector-icons';
 
 // Only import expo-auth-session on native
 let Google: typeof import('expo-auth-session/providers/google') | null = null;
@@ -133,7 +132,7 @@ export default function LoginScreen() {
         disabled={isSigningIn}
       >
         {!isSigningIn && (
-          <Image source={GoogleIcon} style={styles.buttonIcon} resizeMode="contain" />
+          <Ionicons name="logo-google" size={20} color="#0d6e6e" style={{ marginRight: 10 }} />
         )}
         <Text style={styles.buttonText}>
           {isSigningIn ? 'Entrando...' : 'Entrar com Google'}
@@ -167,10 +166,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 72,
     color: '#ffffff',
-    letterSpacing: 4,
+    letterSpacing: 2,
   },
   button: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#ffffff',
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 12,
@@ -188,7 +187,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: '#0d6e6e',
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,

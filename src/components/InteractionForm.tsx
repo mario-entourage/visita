@@ -40,6 +40,7 @@ interface InteractionFormProps {
   isSubmitting?: boolean;
   doctor?: Doctor & { id: string };
   lastInteraction?: Interaction;
+  isHintLoading?: boolean;
 }
 
 const RESULTS = Object.entries(RESULT_LABELS).map(([k, v]) => ({
@@ -52,8 +53,10 @@ export function InteractionForm({
   isSubmitting,
   doctor,
   lastInteraction,
+  isHintLoading,
 }: InteractionFormProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [otherChecked, setOtherChecked] = useState(false);
 
   const {
     control,
@@ -127,8 +130,8 @@ export function InteractionForm({
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-      {/* Talking-points dialogue box */}
-      {hint ? (
+      {/* Talking-points dialogue box — suppressed while loading to avoid flash */}
+      {hint && !isHintLoading ? (
         <View style={styles.hintBox}>
           <View style={styles.hintHeader}>
             <Ionicons name="chatbubble-ellipses-outline" size={14} color={C.teal} />
@@ -388,27 +391,32 @@ export function InteractionForm({
                       <View style={styles.reasonOtherRow}>
                         <Pressable
                           style={styles.checkRow}
-                          onPress={() => onChange(value ? '' : ' ')}
+                          onPress={() => {
+                            const next = !otherChecked;
+                            setOtherChecked(next);
+                            if (!next) onChange('');
+                          }}
                         >
                           <View
                             style={[
                               styles.checkbox,
-                              !!value?.trim() && styles.checkboxChecked,
+                              otherChecked && styles.checkboxChecked,
                             ]}
                           >
-                            {!!value?.trim() ? (
+                            {otherChecked ? (
                               <Ionicons name="checkmark" size={12} color={C.white} />
                             ) : null}
                           </View>
                           <Text style={styles.checkLabel}>Outro motivo</Text>
                         </Pressable>
-                        {!!value?.trim() ? (
+                        {otherChecked ? (
                           <TextInput
                             style={styles.reasonOtherInput}
                             placeholder="Descreva..."
                             placeholderTextColor={C.textLight}
-                            value={value}
+                            value={value ?? ''}
                             onChangeText={onChange}
+                            autoFocus
                           />
                         ) : null}
                       </View>
@@ -511,7 +519,7 @@ const styles = StyleSheet.create({
   },
   resultChip: {
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 11,
     borderRadius: 20,
     borderWidth: 1.5,
   },
@@ -556,7 +564,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     marginTop: 20,
-    paddingVertical: 10,
+    paddingVertical: 14,
   },
   detailsToggleText: {
     fontSize: 13,
