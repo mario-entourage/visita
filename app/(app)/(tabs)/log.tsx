@@ -87,7 +87,12 @@ export default function LogScreen() {
         postVisitNotes: data.postVisitNotes || undefined,
         location,
         active: true,
-        // Extended detail fields (optional)
+        // Visit detail fields (optional)
+        type: data.visitType ?? undefined,
+        samplesDelivered: data.samplesDelivered ?? undefined,
+        spokeFaceToFace: data.spokeFaceToFace ?? undefined,
+        followUpScheduled: data.followUpScheduled ?? undefined,
+        // Cannabis prescriber fields (optional)
         isPrescriber: data.isPrescriber ?? undefined,
         prescribedProducts: data.prescribedProducts || undefined,
         prescriptionType: data.prescriptionType ?? undefined,

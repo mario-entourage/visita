@@ -12,7 +12,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Ionicons } from '@expo/vector-icons';
-import { RESULT_LABELS } from '@/lib/constants';
+import { RESULT_LABELS, INTERACTION_TYPE_LABELS } from '@/lib/constants';
+import type { InteractionType } from '@/types/interaction';
 import { formatTimestamp } from '@/lib/utils';
 import { C, RESULT_COLORS, S } from '@/theme';
 import type { Doctor } from '@/types/doctor';
@@ -22,7 +23,12 @@ const interactionSchema = z.object({
   preVisitNotes: z.string(),
   resultCode: z.number().min(1).max(5),
   postVisitNotes: z.string(),
-  // Extended detail fields
+  // Visit detail fields
+  visitType: z.enum(['field_visit', 'clinical_event', 'congress', 'digital']).optional(),
+  samplesDelivered: z.boolean().optional(),
+  spokeFaceToFace: z.boolean().optional(),
+  followUpScheduled: z.boolean().optional(),
+  // Cannabis prescriber fields
   isPrescriber: z.boolean().optional(),
   prescribedProducts: z.string().optional(),
   prescriptionType: z.enum(['rdc660', 'pharmacy']).optional(),
@@ -69,6 +75,10 @@ export function InteractionForm({
       preVisitNotes: '',
       resultCode: 3,
       postVisitNotes: '',
+      visitType: undefined,
+      samplesDelivered: false,
+      spokeFaceToFace: false,
+      followUpScheduled: false,
       isPrescriber: false,
       prescribedProducts: '',
       prescriptionType: undefined,
@@ -260,6 +270,78 @@ export function InteractionForm({
 
       {detailsOpen ? (
         <View style={styles.detailsContent}>
+
+          {/* Visit type chips */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Tipo da visita</Text>
+            <View style={styles.card}>
+              <Controller
+                control={control}
+                name="visitType"
+                render={({ field: { onChange, value } }) => (
+                  <View style={styles.chipRow}>
+                    {(Object.entries(INTERACTION_TYPE_LABELS) as [InteractionType, string][]).map(
+                      ([key, label]) => (
+                        <Pressable
+                          key={key}
+                          style={[
+                            styles.typeChip,
+                            value === key && styles.typeChipSelected,
+                          ]}
+                          onPress={() => onChange(value === key ? undefined : key)}
+                        >
+                          <Text
+                            style={[
+                              styles.typeChipText,
+                              value === key && styles.typeChipTextSelected,
+                            ]}
+                          >
+                            {label}
+                          </Text>
+                        </Pressable>
+                      )
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+          </View>
+
+          {/* Quick toggles */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Durante a visita</Text>
+            <View style={styles.card}>
+              {(
+                [
+                  { name: 'spokeFaceToFace', label: 'Falou com o médico?' },
+                  { name: 'samplesDelivered', label: 'Deixou amostras?' },
+                  { name: 'followUpScheduled', label: 'Marcou retorno?' },
+                ] as const
+              ).map(({ name, label }, i, arr) => (
+                <Controller
+                  key={name}
+                  control={control}
+                  name={name}
+                  render={({ field: { onChange, value } }) => (
+                    <View
+                      style={[
+                        styles.rowCard,
+                        i < arr.length - 1 && styles.toggleDivider,
+                      ]}
+                    >
+                      <Text style={styles.rowLabel}>{label}</Text>
+                      <Switch
+                        value={!!value}
+                        onValueChange={onChange}
+                        trackColor={{ false: C.border, true: C.teal }}
+                        thumbColor={C.white}
+                      />
+                    </View>
+                  )}
+                />
+              ))}
+            </View>
+          </View>
 
           {/* isPrescriber toggle */}
           <View style={styles.section}>
@@ -504,12 +586,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: 4,
   },
   rowLabel: {
     fontSize: 14,
     color: C.text,
     flex: 1,
     marginRight: 12,
+  },
+  toggleDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
+    paddingBottom: 12,
+    marginBottom: 12,
   },
   // Result chips
   resultGrid: {
