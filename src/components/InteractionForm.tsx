@@ -79,25 +79,46 @@ export function InteractionForm({
 
   const isPrescriber = watch('isPrescriber');
 
-  // Build the hint text for the dialogue box
-  function buildHint(): { label: string; body: string } | null {
+  // Build talking-point suggestions for the dialogue box
+  function buildHint(): { label: string; lines: string[] } | null {
     if (lastInteraction) {
-      const resultLabel = RESULT_LABELS[lastInteraction.resultCode] ?? `Código ${lastInteraction.resultCode}`;
       const dateStr = formatTimestamp(lastInteraction.createdAt, 'dd/MM/yyyy');
-      const notes = lastInteraction.postVisitNotes || lastInteraction.notes;
-      const label = `Última visita (${dateStr}) · ${resultLabel}`;
-      const body = notes
-        ? notes
-        : 'Sem notas da última visita.';
-      return { label, body };
+      const rc = lastInteraction.resultCode;
+      const lines: string[] = [];
+
+      // Talking points derived from the last result code
+      if (rc >= 4) {
+        lines.push('Já demonstrou interesse — pergunte como está a experiência com o produto.');
+      } else if (rc === 3) {
+        lines.push('Ainda está em aberto — traga dados clínicos e cases de sucesso.');
+      } else {
+        lines.push('Resistência anterior — escute as objeções e traga argumentos novos.');
+      }
+
+      // Surface what the rep wrote last time as context
+      const prevNotes = lastInteraction.postVisitNotes || lastInteraction.notes;
+      if (prevNotes) {
+        lines.push(`Na última visita você anotou: "${prevNotes}"`);
+      }
+
+      // Doctor specialty as conversation anchor
+      if (doctor?.mainSpecialty) {
+        lines.push(`Especialidade: ${doctor.mainSpecialty} — adapte a abordagem ao perfil.`);
+      }
+
+      return { label: `Pontos de conversa · visita ${dateStr}`, lines };
     }
+
     if (doctor) {
-      const specialty = doctor.mainSpecialty ?? 'Sem especialidade registrada';
-      return {
-        label: `Primeira visita · ${specialty}`,
-        body: 'Nenhuma interação anterior. Apresente os produtos e mapeie o perfil do prescritor.',
-      };
+      const lines: string[] = [];
+      lines.push('Primeira visita — apresente-se e conheça a rotina do médico.');
+      lines.push('Mapeie: prescreve cannabis? Quais patologias trata?');
+      if (doctor.mainSpecialty) {
+        lines.push(`Especialidade: ${doctor.mainSpecialty} — explore temas relevantes.`);
+      }
+      return { label: 'Pontos de conversa · primeiro contato', lines };
     }
+
     return null;
   }
 
@@ -106,14 +127,19 @@ export function InteractionForm({
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-      {/* Hint dialogue box */}
+      {/* Talking-points dialogue box */}
       {hint ? (
         <View style={styles.hintBox}>
           <View style={styles.hintHeader}>
             <Ionicons name="chatbubble-ellipses-outline" size={14} color={C.teal} />
             <Text style={styles.hintLabel}>{hint.label}</Text>
           </View>
-          <Text style={styles.hintBody}>{hint.body}</Text>
+          {hint.lines.map((line, i) => (
+            <View key={i} style={styles.hintRow}>
+              <Text style={styles.hintBullet}>•</Text>
+              <Text style={styles.hintBody}>{line}</Text>
+            </View>
+          ))}
         </View>
       ) : null}
 
@@ -430,10 +456,22 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
+  hintRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    marginTop: 4,
+  },
+  hintBullet: {
+    fontSize: 13,
+    color: C.teal,
+    lineHeight: 18,
+  },
   hintBody: {
     fontSize: 13,
     color: '#374151',
     lineHeight: 18,
+    flex: 1,
   },
   // Sections
   section: {
