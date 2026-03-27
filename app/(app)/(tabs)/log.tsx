@@ -63,11 +63,13 @@ export default function LogScreen() {
       }
 
       await createInteraction(db, {
-        ...data,
         doctorId: selectedDoctor.id,
         doctorName: selectedDoctor.fullName,
         repId: user.uid,
         repName: user.displayName || user.email || '',
+        resultCode: data.resultCode,
+        preVisitNotes: data.preVisitNotes || undefined,
+        postVisitNotes: data.postVisitNotes || undefined,
         location,
         active: true,
       });

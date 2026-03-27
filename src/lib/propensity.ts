@@ -23,7 +23,7 @@ export function calculatePropensity(
   let totalWeight = 0;
 
   for (const interaction of recent) {
-    const weight = INTERACTION_WEIGHTS[interaction.type] ?? 1.0;
+    const weight = interaction.type ? (INTERACTION_WEIGHTS[interaction.type] ?? 1.0) : 1.0;
     weightedSum += interaction.resultCode * weight;
     totalWeight += weight;
   }

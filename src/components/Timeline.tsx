@@ -27,7 +27,7 @@ export function Timeline({ interactions }: TimelineProps) {
           </View>
           <View style={styles.content}>
             <Text style={styles.type}>
-              {INTERACTION_TYPE_LABELS[interaction.type]}
+              {interaction.type ? INTERACTION_TYPE_LABELS[interaction.type] : 'Visita'}
             </Text>
             <Text style={styles.result}>
               {RESULT_LABELS[interaction.resultCode] ?? `Código ${interaction.resultCode}`}
