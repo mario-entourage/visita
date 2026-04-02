@@ -1,4 +1,4 @@
-# VISITA CRM - Requirements Document
+# VISITAS — Requirements Document
 
 ## Overview
 

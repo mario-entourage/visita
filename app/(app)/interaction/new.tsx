@@ -41,13 +41,29 @@ export default function NewInteractionScreen() {
       }
 
       await createInteraction(db, {
-        ...data,
         doctorId,
         doctorName: doctorName || '',
         repId: user.uid,
         repName: user.displayName || user.email || '',
+        resultCode: data.resultCode,
+        preVisitNotes: data.preVisitNotes || undefined,
+        postVisitNotes: data.postVisitNotes || undefined,
         location,
         active: true,
+        // Visit detail fields
+        type: data.visitType ?? undefined,
+        samplesDelivered: data.samplesDelivered ?? undefined,
+        spokeFaceToFace: data.spokeFaceToFace ?? undefined,
+        followUpScheduled: data.followUpScheduled ?? undefined,
+        // Cannabis fields
+        isPrescriber: data.isPrescriber ?? undefined,
+        prescribedProducts: data.prescribedProducts || undefined,
+        prescriptionType: data.prescriptionType ?? undefined,
+        reasonTherapeutic: data.reasonTherapeutic ?? undefined,
+        reasonDelivery: data.reasonDelivery ?? undefined,
+        reasonPracticality: data.reasonPracticality ?? undefined,
+        reasonCost: data.reasonCost ?? undefined,
+        reasonOther: data.reasonOther || undefined,
       });
 
       // Update doctor stats atomically

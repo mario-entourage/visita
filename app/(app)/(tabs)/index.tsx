@@ -34,7 +34,7 @@ const BUTTONS_BY_ROLE: Record<UserRole, HubButton[]> = {
       icon: 'create-outline',
       label: 'ENVIAR VISITA',
       sub: 'Registrar nova interação',
-      route: '/(app)/doctors',
+      route: '/(app)/(tabs)/log',
     },
     {
       icon: 'people-outline',
