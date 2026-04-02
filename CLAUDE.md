@@ -9,6 +9,7 @@ Use the `/browse` skill from gstack for all web browsing. Never use `mcp__Claude
 - `/plan-ceo-review` — CEO-level plan review
 - `/plan-eng-review` — Engineering plan review
 - `/plan-lazy-dev` — Lazy dev plan review: minimize code, interrogate intent, push complexity to requirements
+- `/ux-analyst` — UX analyst review: broken interactions, device compatibility, color coherence, ASCII screen renders
 - `/review` — Code review
 - `/ship` — Ship code
 - `/browse` — Web browsing

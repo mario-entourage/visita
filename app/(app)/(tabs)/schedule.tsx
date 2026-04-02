@@ -408,8 +408,7 @@ export default function ScheduleScreen() {
                   </Text>
                   <Text style={[styles.date, { color: colors.text }]}>
                     {RESULT_LABELS[item.resultCode] ?? `Código ${item.resultCode}`}
-                    {' · '}
-                    {INTERACTION_TYPE_LABELS[item.type] ?? item.type}
+                    {item.type ? ` · ${INTERACTION_TYPE_LABELS[item.type] ?? item.type}` : ''}
                   </Text>
                   {item.notes ? (
                     <Text style={styles.notes} numberOfLines={1}>

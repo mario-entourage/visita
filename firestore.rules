@@ -171,5 +171,20 @@ service cloud.firestore {
       allow read: if isEntourageUser();
       allow write: if isEntourageUser() && request.auth.uid == userId;
     }
+
+    // ── expenses ──────────────────────────────────────────────────────────────
+    // Reps can create and read their own expenses.
+    // Managers and admins can read all expenses (for accounting review).
+    // Only the owning rep or admin can update/delete.
+    match /expenses/{expenseId} {
+      allow create: if isEntourageUser()
+                    && request.resource.data.repId == request.auth.uid;
+
+      allow read: if isEntourageUser()
+                  && (resource.data.repId == request.auth.uid || isManagerOrAdmin());
+
+      allow update, delete: if isEntourageUser()
+                            && (resource.data.repId == request.auth.uid || isAdmin());
+    }
   }
 }

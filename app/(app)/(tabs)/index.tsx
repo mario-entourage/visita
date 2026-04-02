@@ -48,6 +48,12 @@ const BUTTONS_BY_ROLE: Record<UserRole, HubButton[]> = {
       sub: 'Histórico de visitas',
       route: '/(app)/(tabs)/schedule',
     },
+    {
+      icon: 'receipt-outline',
+      label: 'DESPESAS',
+      sub: 'Enviar comprovantes para reembolso',
+      route: '/(app)/expense/index',
+    },
   ],
   gerente: [
     {

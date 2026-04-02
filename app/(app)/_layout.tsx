@@ -86,6 +86,25 @@ export default function AppLayout() {
             ...headerDefaults,
           }}
         />
+        <Stack.Screen
+          name="expense/index"
+          options={{
+            headerShown: true,
+            title: 'Despesas',
+            headerBackTitle: 'Voltar',
+            ...headerDefaults,
+          }}
+        />
+        <Stack.Screen
+          name="expense/new"
+          options={{
+            headerShown: true,
+            title: 'Nova Despesa',
+            headerBackTitle: 'Voltar',
+            presentation: 'modal',
+            ...headerDefaults,
+          }}
+        />
       </Stack>
     </AuthGuard>
   );

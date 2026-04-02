@@ -19,6 +19,15 @@ export interface Interaction {
   active: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  // Extended detail fields — optional, shown in expanded section
+  isPrescriber?: boolean;
+  prescribedProducts?: string;
+  prescriptionType?: 'rdc660' | 'pharmacy';
+  reasonTherapeutic?: boolean;
+  reasonDelivery?: boolean;
+  reasonPracticality?: boolean;
+  reasonCost?: boolean;
+  reasonOther?: string;
   // Legacy fields — kept for backward compat with older records
   type?: InteractionType;
   samplesDelivered?: boolean;
