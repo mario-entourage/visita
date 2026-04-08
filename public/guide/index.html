@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VISITAS — Guia do Usuario / User Guide</title>
+<style>
+  :root {
+    --teal: #0d6e6e;
+    --teal-dark: #134e4a;
+    --teal-light: #14b8a6;
+    --bg: #f0ebe2;
+    --card: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --light: #9ca3af;
+    --border: #e5e7eb;
+    --red: #ef4444;
+    --green: #22c55e;
+    --amber: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── Header ─────────────────────────── */
+  .hero {
+    background: var(--teal-dark);
+    color: #fff;
+    text-align: center;
+    padding: 48px 24px 40px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    margin-bottom: 8px;
+  }
+  .hero p {
+    font-size: 14px;
+    opacity: 0.7;
+    letter-spacing: 1px;
+  }
+
+  /* ── Language toggle ────────────────── */
+  .lang-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .lang-btn {
+    padding: 8px 24px;
+    border: 2px solid var(--teal);
+    border-radius: 24px;
+    background: transparent;
+    color: var(--teal);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+  .lang-btn.active {
+    background: var(--teal);
+    color: #fff;
+  }
+
+  /* ── TOC ────────────────────────────── */
+  .toc {
+    max-width: 780px;
+    margin: 24px auto;
+    padding: 0 20px;
+  }
+  .toc-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .toc-card h2 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .toc-card ul {
+    list-style: none;
+    columns: 2;
+    column-gap: 24px;
+  }
+  .toc-card li {
+    margin-bottom: 6px;
+  }
+  .toc-card a {
+    color: var(--teal);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .toc-card a:hover { text-decoration: underline; }
+  @media (max-width: 500px) {
+    .toc-card ul { columns: 1; }
+  }
+
+  /* ── Main content ───────────────────── */
+  .content {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+  .lang-section { display: none; }
+  .lang-section.active { display: block; }
+
+  /* ── Section cards ──────────────────── */
+  .role-section {
+    margin-top: 32px;
+  }
+  .role-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--teal);
+  }
+  .role-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .role-badge.rep { background: var(--teal); }
+  .role-badge.ger { background: var(--amber); }
+  .role-badge.ana { background: #3b82f6; }
+  .role-badge.adm { background: var(--red); }
+  .role-badge.all { background: var(--muted); }
+  .role-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--teal-dark);
+    margin-bottom: 12px;
+  }
+  .card p, .card li {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .card ul, .card ol {
+    padding-left: 20px;
+    margin-bottom: 8px;
+  }
+  .card strong { color: var(--teal-dark); }
+
+  /* ── ASCII mockup ───────────────────── */
+  pre.mockup {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    margin: 12px 0 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  /* ── Tables ─────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--teal-dark);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  td:nth-child(n+2) { text-align: center; }
+  th:nth-child(n+2) { text-align: center; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f9fafb; }
+
+  /* ── Pipeline colors in tables ──────── */
+  .c-red { color: #b91c1c; font-weight: 600; }
+  .c-org { color: #c2410c; font-weight: 600; }
+  .c-yel { color: #854d0e; font-weight: 600; }
+  .c-grn { color: #15803d; font-weight: 600; }
+  .c-tea { color: #0f766e; font-weight: 600; }
+
+  /* ── Bullet points styled ───────────── */
+  .tip-list {
+    list-style: none;
+    padding: 0;
+  }
+  .tip-list li {
+    padding: 6px 0 6px 24px;
+    position: relative;
+  }
+  .tip-list li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    color: var(--teal);
+    font-weight: 700;
+  }
+
+  /* ── Permissions table special ──────── */
+  .perm-table td:nth-child(n+2) {
+    font-weight: 700;
+    color: var(--teal);
+  }
+
+  /* ── Footer ─────────────────────────── */
+  .footer {
+    text-align: center;
+    padding: 32px 20px;
+    color: var(--light);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* ── Responsive ─────────────────────── */
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 28px; letter-spacing: 4px; }
+    .card { padding: 18px 16px; }
+    pre.mockup { font-size: 10px; padding: 12px 14px; }
+    table { font-size: 12px; }
+    th, td { padding: 6px 8px; }
+  }
+</style>
+<script>
+function setLang(lang) {
+  document.querySelectorAll('.lang-section').forEach(el => {
+    el.classList.toggle('active', el.dataset.lang === lang);
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  document.querySelectorAll('.toc-list').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+}
+document.addEventListener('DOMContentLoaded', () => setLang('pt'));
+</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ HERO ═══ -->
+<div class="hero">
+  <h1>V I S I T A S</h1>
+  <p>GUIA DO USUARIO / USER GUIDE</p>
+  <p style="margin-top:4px;font-size:12px;opacity:0.5">Abril 2026</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ LANG TOGGLE ═══ -->
+<div class="lang-bar">
+  <button class="lang-btn active" data-lang="pt" onclick="setLang('pt')">Portugues</button>
+  <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════ TOC ═══ -->
+<div class="toc">
+  <div class="toc-card">
+    <div class="toc-list" data-lang="pt" style="display:block">
+      <h2>Indice</h2>
+      <ul>
+        <li><a href="#pt-all">Para Todos</a></li>
+        <li><a href="#pt-rep">Representante</a></li>
+        <li><a href="#pt-ger">Gerente</a></li>
+        <li><a href="#pt-ana">Analista</a></li>
+        <li><a href="#pt-adm">Admin</a></li>
+        <li><a href="#pt-perm">Permissoes</a></li>
+        <li><a href="#pt-gloss">Glossario</a></li>
+      </ul>
+    </div>
+    <div class="toc-list" data-lang="en" style="display:none">
+      <h2>Contents</h2>
+      <ul>
+        <li><a href="#en-all">For All Users</a></li>
+        <li><a href="#en-rep">Sales Rep</a></li>
+        <li><a href="#en-mgr">Manager</a></li>
+        <li><a href="#en-ana">Analyst</a></li>
+        <li><a href="#en-adm">Admin</a></li>
+        <li><a href="#en-perm">Permissions</a></li>
+        <li><a href="#en-gloss">Glossary</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ╔═══════════════════════════════════════════════════════════╗
+     ║                     PORTUGUES                            ║
+     ╚═══════════════════════════════════════════════════════════╝ -->
+<div class="lang-section active" data-lang="pt">
+
+<!-- ── Para Todos ──────────────────────────────────────────── -->
+<div class="role-section" id="pt-all">
+  <div class="role-header">
+    <span class="role-badge all">TODOS</span>
+    <h2>Para Todos os Usuarios</h2>
+  </div>
+
+  <div class="card">
+    <h3>Acesso</h3>
+<pre class="mockup">+----------------------------------+
+|                                  |
+|           V I S I T A S          |
+|        CRM Farmaceutico          |
+|                                  |
+|  +----------------------------+  |
+|  |    Entrar com Google       |  |
+|  +----------------------------+  |
+|                                  |
+|  Acesso restrito para contas     |
+|  @entouragelab.com               |
+|                                  |
++----------------------------------+</pre>
+    <ol>
+      <li>Abra o VISITAS no navegador ou no app do celular</li>
+      <li>Toque em <strong>Entrar com Google</strong></li>
+      <li>Use sua conta <code>@entouragelab.com</code></li>
+    </ol>
+    <p>Contas fora do dominio <code>@entouragelab.com</code> nao tem acesso.</p>
+  </div>
+
+  <div class="card">
+    <h3>Card do Medico</h3>
+<pre class="mockup">+--------------------------------------+
+| Dr. Carlos Mendes              [4/5] |
+| cardiologista                  12 tq |
+| Sao Paulo, SP                        |
+| [Vai Prescrever]  &lt;-- pipeline       |
+| [P.Alto] [F.Op.]  &lt;-- tags          |
+| Ultima visita: 2 dias atras         |
++--------------------------------------+</pre>
+    <ul>
+      <li><strong>Badge de propensidade</strong> &mdash; pontuacao de 1 a 5</li>
+      <li><strong>Estagio do pipeline</strong> &mdash; badge colorido (Nao &rarr; Prescrevendo)</li>
+      <li><strong>Tags</strong> &mdash; chips com abreviacoes (P.Alto, F.Op., Prior.)</li>
+      <li><strong>Toques</strong> &mdash; total de interacoes registradas</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Sinalizacao (Flag)</h3>
+    <p>Qualquer usuario pode <strong>sinalizar</strong> um medico com um toque. Para <strong>remover</strong> a sinalizacao, e obrigatorio deixar uma nota:</p>
+<pre class="mockup">+----------------------------------+
+| [flag] Remover Sinalizacao       |
+|                                  |
+| Explique por que esta removendo  |
+| o flag deste medico. Essa        |
+| informacao sera visivel para     |
+| o gerente.                       |
+|                                  |
+| +------------------------------+ |
+| | Motivo da remocao do flag... | |
+| |                              | |
+| +------------------------------+ |
+|                                  |
+| [Cancelar]   [Remover Flag]     |
++----------------------------------+</pre>
+  </div>
+</div>
+
+<!-- ── Representante ───────────────────────────────────────── -->
+<div class="role-section" id="pt-rep">
+  <div class="role-header">
+    <span class="role-badge rep">REP</span>
+    <h2>Representante</h2>
+  </div>
+
+  <div class="card">
+    <h3>Hub do Representante</h3>
+<pre class="mockup">+----------------------------------+
+|                                  |
+|           V I S I T A S          |
+|                                  |
+|  +----------------------------+  |
+|  | [pen]  ENVIAR VISITA     > |  |
+|  |        Registrar nova       |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [ppl]  MEDICOS           > |  |
+|  |        Ver agenda e sinal.  |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [clk]  ATIVIDADE         > |  |
+|  |        Historico de visitas |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [rec]  DESPESAS           > |  |
+|  |        Enviar comprovantes  |  |
+|  +----------------------------+  |
+|                                  |
++----------------------------------+</pre>
+    <table>
+      <tr><th>Botao</th><th>O que faz</th></tr>
+      <tr><td><strong>ENVIAR VISITA</strong></td><td>Registrar interacao</td></tr>
+      <tr><td><strong>MEDICOS</strong></td><td>Agendados e sinalizados</td></tr>
+      <tr><td><strong>ATIVIDADE</strong></td><td>Historico de visitas</td></tr>
+      <tr><td><strong>DESPESAS</strong></td><td>Comprovantes de reembolso</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Registrar Interacao</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Nova Interacao                 |
++----------------------------------+
+|                                  |
+| Tipo de Interacao                |
+| (Visita) (Evento) (Congr) (Dig) |
+|                                  |
+| Resultado                        |
+| [1] [2] [3] [4] [5]             |
+| verm lar amar verd teal          |
+|                                  |
+| + Mais detalhes                  |
+| ................................ |
+| . Amostras entregues   [toggle]. |
+| . Falou pessoalmente   [toggle]. |
+| . Follow-up agendado   [toggle]. |
+| ................................ |
+|                                  |
+| Anotacoes                        |
+| +------------------------------+ |
+| |                              | |
+| +------------------------------+ |
+|                                  |
+| +------------------------------+ |
+| |    Registrar Interacao       | |
+| +------------------------------+ |
++----------------------------------+</pre>
+    <ol>
+      <li>Toque em <strong>ENVIAR VISITA</strong> ou abra o medico</li>
+      <li>Selecione o tipo: Visita de Campo, Evento Clinico, Congresso ou Digital</li>
+      <li>Escolha o resultado:
+        <span class="c-red">1-Nao</span> |
+        <span class="c-org">2-Prov.Nao</span> |
+        <span class="c-yel">3-Aberto</span> |
+        <span class="c-grn">4-Vai Prescr.</span> |
+        <span class="c-tea">5-Prescrevendo</span>
+      </li>
+      <li>Marque detalhes opcionais e adicione anotacoes</li>
+      <li>Toque em <strong>Registrar Interacao</strong></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Lista de Medicos</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Medicos                   [+]  |
++----------------------------------+
+| (Agend.) (Sinal.) (IA) (Perto)  |
++----------------------------------+
+|                                  |
+| --- Agendados ---                |
+| +------------------------------+ |
+| | Dr. Carlos Mendes      [5/5]| |
+| | cardiologista                | |
+| | Hoje 10h                   > | |
+| +------------------------------+ |
+|                                  |
+| --- Sinalizados ---              |
+| +------------------------------+ |
+| | Dra. Ana Souza     [flag]   | |
+| | pediatra                     | |
+| | Clinica Bem-Estar          > | |
+| +------------------------------+ |
+|                                  |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Ficha do Medico</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Dr. Carlos Mendes              |
++----------------------------------+
+| [CM]  Carlos Mendes              |
+|       cardiologista              |
+|       Sao Paulo, SP             |
+|       [4/5]  12 toques          |
+|       [Vai Prescrever]          |
+|       [P.Alto] [F.Op.]         |
+|       [Sinalizar] [Tags]       |
++----------------------------------+
+| Resumo da Ultima Visita          |
+| Resultado: [Vai Prescrever]     |
+| "Gostou da apresentacao..."     |
+| [v] Amostras  [v] Follow-up    |
++----------------------------------+
+| Contato                          |
+| Celular: (11) 99999-0000        |
+| Email: carlos@email.com         |
++----------------------------------+
+| [    Registrar Interacao       ] |
+| [  Medico Nao Localizado       ] |
++----------------------------------+
+| Historico de Interacoes          |
+| o  Visita de Campo              |
+| |  Resultado: 4 - Vai Prescr.  |
+| |  15/03/2026 14:30            |
+| o  Digital                      |
+|    Resultado: 3 - Aberto       |
+|    01/03/2026 16:45            |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Despesas</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Despesas                  [+]  |
++----------------------------------+
+| Total: R$ 342,50                 |
++----------------------------------+
+|                                  |
+| +------------------------------+ |
+| | [img] Combustivel   R$ 85,00| |
+| |       12/03/2026             | |
+| +------------------------------+ |
+| +------------------------------+ |
+| | [img] Alimentacao   R$ 32,50| |
+| |       12/03/2026             | |
+| +------------------------------+ |
+|                                  |
++----------------------------------+</pre>
+<pre class="mockup">+----------------------------------+
+| &lt; Nova Despesa                   |
++----------------------------------+
+|                                  |
+| +------------------------------+ |
+| |    [foto do comprovante]     | |
+| +------------------------------+ |
+| [Camera]          [Galeria]      |
+|                                  |
+| Valor (R$)                       |
+| +------------------------------+ |
+| |  0,00                        | |
+| +------------------------------+ |
+|                                  |
+| Categoria                        |
+| (Combust.) (Alim.) (Estac.)     |
+| (Pedagio)  (Outro)              |
+|                                  |
+| Observacoes (opcional)           |
+| +------------------------------+ |
+| |                              | |
+| +------------------------------+ |
+|                                  |
+| [      Enviar Despesa          ] |
++----------------------------------+</pre>
+    <ol>
+      <li>Toque em <strong>DESPESAS</strong> no Hub &rarr; <strong>+</strong></li>
+      <li>Tire uma foto ou selecione da galeria</li>
+      <li>Informe valor em R$ e escolha a categoria</li>
+      <li>Toque em <strong>Enviar Despesa</strong></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Reportar Medico Nao Localizado</h3>
+<pre class="mockup">+----------------------------------+
+| [loc] Medico Nao Localizado      |
+|                                  |
+| Selecione o motivo pelo qual o   |
+| medico nao foi encontrado:       |
+|                                  |
+| ( ) Mudou de endereco           |
+| ( ) Nao encontrado              |
+| (o) Aposentou                   |
+| ( ) Clinica fechou              |
+| ( ) Outro                       |
+|                                  |
+| [Cancelar]  [Enviar Relatorio]  |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Adicionar Medico</h3>
+<pre class="mockup">+----------------------------------+
+| Adicionar Medico                 |
++----------------------------------+
+| Nome *        [Carlos          ] |
+| Sobrenome *   [Mendes          ] |
+| Estado *      [SP              ] |
+| Especialidade [Cardiologia     ] |
+|                                  |
+| [Cancelar]    [Adicionar]       |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Dicas</h3>
+    <ul class="tip-list">
+      <li>Registre a visita assim que sair do consultorio</li>
+      <li>Use a sinalizacao para marcar medicos que precisam de acompanhamento</li>
+      <li>Confira os medicos sinalizados antes de planejar seu dia</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Gerente ─────────────────────────────────────────────── -->
+<div class="role-section" id="pt-ger">
+  <div class="role-header">
+    <span class="role-badge ger">GER</span>
+    <h2>Gerente</h2>
+  </div>
+
+  <div class="card">
+    <h3>Hub do Gerente</h3>
+<pre class="mockup">+----------------------------------+
+|        [MODO GERENCIA]           |
+|           V I S I T A S          |
+|                                  |
+|  +----------------------------+  |
+|  | [ppl]  EQUIPE            > |  |
+|  |        Ver desemp. dos reps |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [cal]  AGENDA            > |  |
+|  |        Agendas dos reps     |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [med]  MEDICOS           > |  |
+|  |        Buscar e filtrar     |  |
+|  +----------------------------+  |
+|                                  |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Equipe</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Equipe                         |
++----------------------------------+
+| REPRESENTANTES                   |
+| +------------------------------+ |
+| | [L] Lamine                 > | |
+| |     Minas Gerais             | |
+| +------------------------------+ |
+| | [E] Erling                 > | |
+| |     Sao Paulo                | |
+| +------------------------------+ |
+| | [K] Kylian                 > | |
+| |     Rio de Janeiro           | |
+| +------------------------------+ |
++----------------------------------+</pre>
+<pre class="mockup">+----------------------------------+
+| &lt; Kylian                         |
++----------------------------------+
+| +--------+ +--------+ +--------+|
+| |  chat  | |  med   | |  cal   ||
+| |   17   | |   8    | |   5    ||
+| |Interac.| |Amostras| |Follow  ||
+| +--------+ +--------+ +--------+|
+|                                  |
+| HISTORICO DE INTERACOES          |
+| o  Visita de Campo              |
+| |  Resultado: 5 - Prescrevendo |
+| |  15/03/2026 14:30            |
+| o  Digital                      |
+|    Resultado: 3 - Aberto       |
+|    12/03/2026 10:00            |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Agendas</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Agendas                        |
++----------------------------------+
+| (Lamine) (Erling) [Kylian] ...  |
++----------------------------------+
+| +------------------------------+ |
+| | Dra. Ana Souza               | |
+| | terca 10h - Hosp. Central  >| |
+| +------------------------------+ |
+| | Dr. Kevin Patel              | |
+| | terca 13h - Clin. Bem-Estar>| |
+| +------------------------------+ |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Atribuir Representante</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Dr. Carlos Mendes              |
++----------------------------------+
+| Atribuir Representante    [v]    |
+| +------------------------------+ |
+| |  Lamine - Minas Gerais      | |
+| |  Erling - Sao Paulo       &lt; | |
+| |  Kylian - Rio de Janeiro     | |
+| +------------------------------+ |
+|                                  |
+| [     Agendar Reuniao          ] |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Tags de Medicos</h3>
+<pre class="mockup">+----------------------------------+
+| [tags] Tags do Medico            |
+|                                  |
+| Selecione as tags:               |
+|                                  |
+| [x] Potencial Alto              |
+| [ ] Nova Clinica                 |
+| [ ] Visita Conjunta              |
+| [ ] Prioritario                  |
+| [x] Formador de Opiniao          |
+| [ ] Risco de Inatividade         |
+|                                  |
+| [Cancelar]   [Salvar Tags]      |
++----------------------------------+</pre>
+    <table>
+      <tr><th>Tag</th><th>Abreviacao</th><th>Uso</th></tr>
+      <tr><td>Potencial Alto</td><td>P.Alto</td><td>Alto potencial de prescricao</td></tr>
+      <tr><td>Nova Clinica</td><td>N.Cli</td><td>Clinica recem-aberta</td></tr>
+      <tr><td>Visita Conjunta</td><td>V.Conj</td><td>Visita acompanhada</td></tr>
+      <tr><td>Prioritario</td><td>Prior.</td><td>Prioridade maxima</td></tr>
+      <tr><td>Formador de Opiniao</td><td>F.Op.</td><td>Influenciador</td></tr>
+      <tr><td>Risco de Inatividade</td><td>Risco</td><td>Risco de parar de prescrever</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Pipeline</h3>
+    <table>
+      <tr><th>Estagio</th><th>Cod.</th><th>Significado</th></tr>
+      <tr><td class="c-red">Nao</td><td>1</td><td>Medico recusou</td></tr>
+      <tr><td class="c-org">Provavelmente Nao</td><td>2</td><td>Pouca abertura</td></tr>
+      <tr><td class="c-yel">Aberto</td><td>3</td><td>Neutro</td></tr>
+      <tr><td class="c-grn">Vai Prescrever</td><td>4</td><td>Sinal positivo</td></tr>
+      <tr><td class="c-tea">Prescrevendo</td><td>5</td><td>Ja prescrevendo</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Monitorar Flags</h3>
+    <p>Quando um rep remove uma sinalizacao, o sistema registra:</p>
+    <ul>
+      <li>Quem removeu</li>
+      <li>Quando removeu</li>
+      <li>Por que removeu (nota obrigatoria)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Analista ────────────────────────────────────────────── -->
+<div class="role-section" id="pt-ana">
+  <div class="role-header">
+    <span class="role-badge ana">ANA</span>
+    <h2>Analista</h2>
+  </div>
+
+  <div class="card">
+    <h3>Hub do Analista</h3>
+<pre class="mockup">+----------------------------------+
+|        [MODO ANALISTA]           |
+|           V I S I T A S          |
+|                                  |
+|  +----------------------------+  |
+|  | [bar]  RELATORIOS        > |  |
+|  |        Dados e analises     |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [med]  MEDICOS           > |  |
+|  |        Buscar e filtrar     |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [clk]  ATIVIDADE         > |  |
+|  |        Historico geral      |  |
+|  +----------------------------+  |
+|                                  |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Painel Analitico</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Painel Analitico               |
++----------------------------------+
+|                                  |
+| +--------+ +--------+ +--------+|
+| | [ppl]  | | [pen]  | | [chk]  ||
+| |  245   | |  1842  | |   38   ||
+| |Medicos | |Interac.| |Prescr. ||
+| +--------+ +--------+ +--------+|
+|                                  |
+| PIPELINE DE MEDICOS              |
+| +------------------------------+ |
+| | o Nao            |### | 42  | |
+| | o Prov. Nao      |##  | 28  | |
+| | o Aberto         |####| 67  | |
+| | o Vai Prescrever |### | 45  | |
+| | o Prescrevendo   |##  | 38  | |
+| | o Sem resultado  |#   | 25  | |
+| +------------------------------+ |
+|                                  |
+| VISITAS POR REPRESENTANTE        |
+| +------------------------------+ |
+| | Lamine                  127  | |
+| | 8 prescrevendo        visits | |
+| +------------------------------+ |
+| | Erling                   98  | |
+| | 5 prescrevendo        visits | |
+| +------------------------------+ |
+| | Kylian                   74  | |
+| | 3 prescrevendo        visits | |
+| +------------------------------+ |
+|                                  |
++----------------------------------+</pre>
+    <p><strong>KPIs:</strong> Total de medicos, interacoes, e medicos prescrevendo.</p>
+    <p><strong>Pipeline:</strong> Distribuicao por estagio com barras proporcionais.</p>
+    <p><strong>Visitas/Rep:</strong> Ordenado por volume, com contagem de prescricoes.</p>
+  </div>
+
+  <div class="card">
+    <h3>Como usar os dados</h3>
+    <ul class="tip-list">
+      <li><strong>Comparar reps:</strong> Identifique melhores taxas de conversao</li>
+      <li><strong>Analisar pipeline:</strong> Muitos em "Nao"/"Aberto" = necessidade de treinamento</li>
+      <li><strong>Sem resultado:</strong> Muitos toques sem resultado = abordagem diferente</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Admin ───────────────────────────────────────────────── -->
+<div class="role-section" id="pt-adm">
+  <div class="role-header">
+    <span class="role-badge adm">ADM</span>
+    <h2>Admin</h2>
+  </div>
+
+  <div class="card">
+    <h3>Hub do Admin</h3>
+<pre class="mockup">+----------------------------------+
+|        [ADMINISTRACAO]           |
+|           V I S I T A S          |
+|                                  |
+|  +----------------------------+  |
+|  | [ppl]  EQUIPE            > |  |
+|  |        Ver desemp. dos reps |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [cal]  AGENDA            > |  |
+|  |        Agendas dos reps     |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [med]  MEDICOS           > |  |
+|  |        Todos medicos/filtros|  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [bar]  ATIVIDADE         > |  |
+|  |        Historico geral      |  |
+|  +----------------------------+  |
+|                                  |
+|  Visualizar como:                |
+|  (Admin) (Gerente) (Analista)    |
+|          (Representante)         |
+|  [x Parar simulacao]            |
++----------------------------------+</pre>
+    <ol>
+      <li>Toque no chip do perfil desejado em <strong>Visualizar como:</strong></li>
+      <li>A tela muda para mostrar o que aquele perfil ve</li>
+      <li>Para voltar: <strong>Parar simulacao</strong> ou chip Admin</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ── Permissoes ──────────────────────────────────────────── -->
+<div class="role-section" id="pt-perm">
+  <div class="role-header">
+    <h2>Resumo de Permissoes</h2>
+  </div>
+  <div class="card">
+    <table class="perm-table">
+      <tr><th style="text-align:left">Funcionalidade</th><th>Rep</th><th>Ger.</th><th>Ana.</th><th>Adm.</th></tr>
+      <tr><td>Registrar interacao</td><td>x</td><td></td><td></td><td>x</td></tr>
+      <tr><td>Enviar despesas</td><td>x</td><td></td><td></td><td>x</td></tr>
+      <tr><td>Ver agenda pessoal</td><td>x</td><td></td><td></td><td>x</td></tr>
+      <tr><td>Sinalizar medico</td><td>x</td><td>x</td><td>x</td><td>x</td></tr>
+      <tr><td>Remover flag (com nota)</td><td>x</td><td>x</td><td>x</td><td>x</td></tr>
+      <tr><td>Editar tags de medicos</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Ver equipe/agenda dos reps</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Atribuir rep a medico</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Agendar reuniao</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Painel analitico</td><td></td><td></td><td>x</td><td>x</td></tr>
+      <tr><td>Ver todas as despesas</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Simular outros perfis</td><td></td><td></td><td></td><td>x</td></tr>
+      <tr><td>Gerenciar roles</td><td></td><td></td><td></td><td>x</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ── Glossario ───────────────────────────────────────────── -->
+<div class="role-section" id="pt-gloss">
+  <div class="role-header">
+    <h2>Glossario</h2>
+  </div>
+  <div class="card">
+    <table>
+      <tr><th style="text-align:left">Termo</th><th style="text-align:left">Significado</th></tr>
+      <tr><td><strong>Toque</strong></td><td>Interacao registrada entre rep e medico</td></tr>
+      <tr><td><strong>Propensidade</strong></td><td>Pontuacao 1-5 de probabilidade de prescricao</td></tr>
+      <tr><td><strong>Pipeline</strong></td><td>Estagio atual baseado no ultimo resultado</td></tr>
+      <tr><td><strong>Flag</strong></td><td>Marcacao para acompanhamento especial</td></tr>
+      <tr><td><strong>Tag</strong></td><td>Rotulo gerencial (Gerente/Admin)</td></tr>
+      <tr><td><strong>Resultado</strong></td><td>Codigo 1-5 registrado apos cada interacao</td></tr>
+      <tr><td><strong>Despesa</strong></td><td>Comprovante de gasto para reembolso</td></tr>
+    </table>
+  </div>
+</div>
+
+</div><!-- /pt -->
+
+<!-- ╔═══════════════════════════════════════════════════════════╗
+     ║                       ENGLISH                            ║
+     ╚═══════════════════════════════════════════════════════════╝ -->
+<div class="lang-section" data-lang="en">
+
+<!-- ── For All Users ───────────────────────────────────────── -->
+<div class="role-section" id="en-all">
+  <div class="role-header">
+    <span class="role-badge all">ALL</span>
+    <h2>For All Users</h2>
+  </div>
+
+  <div class="card">
+    <h3>Login</h3>
+<pre class="mockup">+----------------------------------+
+|                                  |
+|           V I S I T A S          |
+|        Pharmaceutical CRM        |
+|                                  |
+|  +----------------------------+  |
+|  |    Sign in with Google     |  |
+|  +----------------------------+  |
+|                                  |
+|  Access restricted to            |
+|  @entouragelab.com accounts      |
+|                                  |
++----------------------------------+</pre>
+    <ol>
+      <li>Open VISITAS in your browser or phone</li>
+      <li>Tap <strong>Sign in with Google</strong></li>
+      <li>Use your <code>@entouragelab.com</code> account</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Doctor Card</h3>
+<pre class="mockup">+--------------------------------------+
+| Dr. Carlos Mendes              [4/5] |
+| cardiologist                   12 tc |
+| Sao Paulo, SP                        |
+| [Will Prescribe]  &lt;-- pipeline       |
+| [H.Pot] [O.Lead]  &lt;-- tags          |
+| Last visit: 2 days ago              |
++--------------------------------------+</pre>
+    <ul>
+      <li><strong>Propensity badge</strong> &mdash; score from 1 to 5</li>
+      <li><strong>Pipeline stage</strong> &mdash; colored badge (No &rarr; Prescribing)</li>
+      <li><strong>Tags</strong> &mdash; abbreviated chips (H.Pot, O.Lead, Prior.)</li>
+      <li><strong>Touches</strong> &mdash; total logged interactions</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Flagging</h3>
+    <p>Any user can <strong>flag</strong> a doctor with one tap. To <strong>remove</strong> the flag, a note is required:</p>
+<pre class="mockup">+----------------------------------+
+| [flag] Remove Flag               |
+|                                  |
+| Explain why you are removing     |
+| the flag from this doctor.       |
+| This information will be         |
+| visible to the manager.          |
+|                                  |
+| +------------------------------+ |
+| | Reason for removing flag...  | |
+| |                              | |
+| +------------------------------+ |
+|                                  |
+| [Cancel]      [Remove Flag]     |
++----------------------------------+</pre>
+  </div>
+</div>
+
+<!-- ── Sales Rep ───────────────────────────────────────────── -->
+<div class="role-section" id="en-rep">
+  <div class="role-header">
+    <span class="role-badge rep">REP</span>
+    <h2>Sales Rep (Representante)</h2>
+  </div>
+
+  <div class="card">
+    <h3>Rep Hub</h3>
+<pre class="mockup">+----------------------------------+
+|                                  |
+|           V I S I T A S          |
+|                                  |
+|  +----------------------------+  |
+|  | [pen]  LOG VISIT         > |  |
+|  |        Record new visit     |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [ppl]  DOCTORS           > |  |
+|  |        Schedule &amp; flagged   |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [clk]  ACTIVITY          > |  |
+|  |        Visit history        |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [rec]  EXPENSES          > |  |
+|  |        Submit receipts      |  |
+|  +----------------------------+  |
+|                                  |
++----------------------------------+</pre>
+    <table>
+      <tr><th>Button</th><th>Purpose</th></tr>
+      <tr><td><strong>LOG VISIT</strong></td><td>Record an interaction</td></tr>
+      <tr><td><strong>DOCTORS</strong></td><td>Scheduled &amp; flagged</td></tr>
+      <tr><td><strong>ACTIVITY</strong></td><td>Visit history</td></tr>
+      <tr><td><strong>EXPENSES</strong></td><td>Submit receipts</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Log an Interaction</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; New Interaction                |
++----------------------------------+
+|                                  |
+| Interaction Type                 |
+| (Field) (Event) (Congr.) (Dig.) |
+|                                  |
+| Result                           |
+| [1] [2] [3] [4] [5]             |
+| red org  yel grn teal            |
+|                                  |
+| + More details                   |
+| ................................ |
+| . Samples delivered    [toggle]. |
+| . Spoke face to face   [toggle]. |
+| . Follow-up scheduled  [toggle]. |
+| ................................ |
+|                                  |
+| Notes                            |
+| +------------------------------+ |
+| |                              | |
+| +------------------------------+ |
+|                                  |
+| [     Log Interaction          ] |
++----------------------------------+</pre>
+    <ol>
+      <li>Tap <strong>LOG VISIT</strong> or open a doctor</li>
+      <li>Select type: Field Visit, Clinical Event, Congress, or Digital</li>
+      <li>Choose result:
+        <span class="c-red">1-No</span> |
+        <span class="c-org">2-Prob.Not</span> |
+        <span class="c-yel">3-Open</span> |
+        <span class="c-grn">4-Will Prescr.</span> |
+        <span class="c-tea">5-Prescribing</span>
+      </li>
+      <li>Toggle optional details, add notes</li>
+      <li>Tap <strong>Log Interaction</strong></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Doctor List</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Doctors                   [+]  |
++----------------------------------+
+| (Sched.) (Flag.) (AI) (Near)    |
++----------------------------------+
+|                                  |
+| --- Scheduled ---                |
+| +------------------------------+ |
+| | Dr. Carlos Mendes      [5/5]| |
+| | cardiologist                 | |
+| | Today 10am                 > | |
+| +------------------------------+ |
+|                                  |
+| --- Flagged ---                  |
+| +------------------------------+ |
+| | Dra. Ana Souza     [flag]   | |
+| | pediatrician                 | |
+| | Clinica Bem-Estar          > | |
+| +------------------------------+ |
+|                                  |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Doctor Detail</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Dr. Carlos Mendes              |
++----------------------------------+
+| [CM]  Carlos Mendes              |
+|       cardiologist               |
+|       Sao Paulo, SP             |
+|       [4/5]  12 touches         |
+|       [Will Prescribe]          |
+|       [H.Pot] [O.Lead]         |
+|       [Flag] [Tags]            |
++----------------------------------+
+| Last Visit Summary               |
+| Result: [Will Prescribe]        |
+| "Liked the presentation..."     |
+| [v] Samples  [v] Follow-up     |
++----------------------------------+
+| Contact                          |
+| Mobile: (11) 99999-0000         |
+| Email: carlos@email.com         |
++----------------------------------+
+| [     Log Interaction          ] |
+| [  Doctor Not Found            ] |
++----------------------------------+
+| Interaction History              |
+| o  Field Visit                  |
+| |  Result: 4 - Will Prescribe  |
+| |  Mar 15 2026 14:30           |
+| o  Digital                      |
+|    Result: 3 - Open            |
+|    Mar 01 2026 16:45           |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Expenses</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Expenses                  [+]  |
++----------------------------------+
+| Total: R$ 342.50                 |
++----------------------------------+
+| +------------------------------+ |
+| | [img] Fuel          R$ 85.00| |
+| |       Mar 12 2026            | |
+| +------------------------------+ |
+| | [img] Meals         R$ 32.50| |
+| |       Mar 12 2026            | |
+| +------------------------------+ |
++----------------------------------+</pre>
+<pre class="mockup">+----------------------------------+
+| &lt; New Expense                    |
++----------------------------------+
+|                                  |
+| +------------------------------+ |
+| |     [receipt photo]          | |
+| +------------------------------+ |
+| [Camera]          [Gallery]      |
+|                                  |
+| Amount (R$)                      |
+| +------------------------------+ |
+| |  0.00                        | |
+| +------------------------------+ |
+|                                  |
+| Category                         |
+| (Fuel) (Meals) (Parking)        |
+| (Tolls)  (Other)                |
+|                                  |
+| Notes (optional)                 |
+| +------------------------------+ |
+| |                              | |
+| +------------------------------+ |
+|                                  |
+| [      Submit Expense          ] |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Report Doctor Not Found</h3>
+<pre class="mockup">+----------------------------------+
+| [loc] Doctor Not Found           |
+|                                  |
+| Select the reason why the        |
+| doctor was not found:            |
+|                                  |
+| ( ) Changed address             |
+| ( ) Not found                   |
+| (o) Retired                     |
+| ( ) Clinic closed               |
+| ( ) Other                       |
+|                                  |
+| [Cancel]   [Submit Report]      |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Add a Doctor</h3>
+<pre class="mockup">+----------------------------------+
+| Add Doctor                       |
++----------------------------------+
+| First Name *  [Carlos          ] |
+| Last Name *   [Mendes          ] |
+| State *       [SP              ] |
+| Specialty     [Cardiology      ] |
+|                                  |
+| [Cancel]       [Add]            |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Tips</h3>
+    <ul class="tip-list">
+      <li>Log the visit as soon as you leave the office</li>
+      <li>Use flagging for doctors who need special attention</li>
+      <li>Check flagged doctors before planning your day</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Manager ─────────────────────────────────────────────── -->
+<div class="role-section" id="en-mgr">
+  <div class="role-header">
+    <span class="role-badge ger">MGR</span>
+    <h2>Manager (Gerente)</h2>
+  </div>
+
+  <div class="card">
+    <h3>Manager Hub</h3>
+<pre class="mockup">+----------------------------------+
+|        [MANAGER MODE]            |
+|           V I S I T A S          |
+|                                  |
+|  +----------------------------+  |
+|  | [ppl]  TEAM              > |  |
+|  |        Rep performance      |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [cal]  SCHEDULES         > |  |
+|  |        Rep schedules        |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [med]  DOCTORS           > |  |
+|  |        Search and filter    |  |
+|  +----------------------------+  |
+|                                  |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Team</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Team                           |
++----------------------------------+
+| REPRESENTATIVES                  |
+| +------------------------------+ |
+| | [L] Lamine                 > | |
+| |     Minas Gerais             | |
+| +------------------------------+ |
+| | [E] Erling                 > | |
+| |     Sao Paulo                | |
+| +------------------------------+ |
+| | [K] Kylian                 > | |
+| |     Rio de Janeiro           | |
+| +------------------------------+ |
++----------------------------------+</pre>
+<pre class="mockup">+----------------------------------+
+| &lt; Kylian                         |
++----------------------------------+
+| +--------+ +--------+ +--------+|
+| |  chat  | |  med   | |  cal   ||
+| |   17   | |   8    | |   5    ||
+| |Interact| |Samples | |Follow  ||
+| +--------+ +--------+ +--------+|
+|                                  |
+| INTERACTION HISTORY              |
+| o  Field Visit                  |
+| |  Result: 5 - Prescribing     |
+| |  Mar 15 2026 14:30           |
+| o  Digital                      |
+|    Result: 3 - Open            |
+|    Mar 12 2026 10:00           |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Schedules</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Schedules                      |
++----------------------------------+
+| (Lamine) (Erling) [Kylian] ...  |
++----------------------------------+
+| +------------------------------+ |
+| | Dra. Ana Souza               | |
+| | Tue 10am - Central Hosp.   >| |
+| +------------------------------+ |
+| | Dr. Kevin Patel              | |
+| | Tue 1pm - Clinica Bem-Estar>| |
+| +------------------------------+ |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Assign a Rep</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Dr. Carlos Mendes              |
++----------------------------------+
+| Assign Representative     [v]    |
+| +------------------------------+ |
+| |  Lamine - Minas Gerais      | |
+| |  Erling - Sao Paulo       &lt; | |
+| |  Kylian - Rio de Janeiro     | |
+| +------------------------------+ |
+|                                  |
+| [     Schedule Meeting         ] |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Doctor Tags</h3>
+<pre class="mockup">+----------------------------------+
+| [tags] Doctor Tags               |
+|                                  |
+| Select tags:                     |
+|                                  |
+| [x] High Potential              |
+| [ ] New Clinic                   |
+| [ ] Joint Visit                  |
+| [ ] Priority                     |
+| [x] Opinion Leader               |
+| [ ] Inactivity Risk              |
+|                                  |
+| [Cancel]    [Save Tags]         |
++----------------------------------+</pre>
+    <table>
+      <tr><th>Tag</th><th>Abbrev.</th><th>Usage</th></tr>
+      <tr><td>Potencial Alto</td><td>H.Pot</td><td>High prescription potential</td></tr>
+      <tr><td>Nova Clinica</td><td>N.Cli</td><td>Newly opened clinic</td></tr>
+      <tr><td>Visita Conjunta</td><td>J.Vis</td><td>Needs a joint visit</td></tr>
+      <tr><td>Prioritario</td><td>Prior.</td><td>Top priority</td></tr>
+      <tr><td>Formador de Opiniao</td><td>O.Lead</td><td>Influences peers</td></tr>
+      <tr><td>Risco de Inatividade</td><td>Risk</td><td>At risk of stopping</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Pipeline</h3>
+    <table>
+      <tr><th>Stage</th><th>Code</th><th>Meaning</th></tr>
+      <tr><td class="c-red">No</td><td>1</td><td>Doctor refused</td></tr>
+      <tr><td class="c-org">Probably Not</td><td>2</td><td>Little openness</td></tr>
+      <tr><td class="c-yel">Open</td><td>3</td><td>Neutral</td></tr>
+      <tr><td class="c-grn">Will Prescribe</td><td>4</td><td>Positive signal</td></tr>
+      <tr><td class="c-tea">Prescribing</td><td>5</td><td>Already prescribing</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Monitor Flags</h3>
+    <p>When a rep removes a flag, the system records:</p>
+    <ul>
+      <li>Who removed it</li>
+      <li>When it was removed</li>
+      <li>Why (required note)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Analyst ─────────────────────────────────────────────── -->
+<div class="role-section" id="en-ana">
+  <div class="role-header">
+    <span class="role-badge ana">ANA</span>
+    <h2>Analyst (Analista)</h2>
+  </div>
+
+  <div class="card">
+    <h3>Analyst Hub</h3>
+<pre class="mockup">+----------------------------------+
+|        [ANALYST MODE]            |
+|           V I S I T A S          |
+|                                  |
+|  +----------------------------+  |
+|  | [bar]  REPORTS           > |  |
+|  |        Data and analytics   |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [med]  DOCTORS           > |  |
+|  |        Search and filter    |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [clk]  ACTIVITY          > |  |
+|  |        Full visit history   |  |
+|  +----------------------------+  |
+|                                  |
++----------------------------------+</pre>
+  </div>
+
+  <div class="card">
+    <h3>Analytics Dashboard</h3>
+<pre class="mockup">+----------------------------------+
+| &lt; Analytics Dashboard            |
++----------------------------------+
+|                                  |
+| +--------+ +--------+ +--------+|
+| | [ppl]  | | [pen]  | | [chk]  ||
+| |  245   | |  1842  | |   38   ||
+| |Doctors | |Interact| |Prescr. ||
+| +--------+ +--------+ +--------+|
+|                                  |
+| DOCTOR PIPELINE                  |
+| +------------------------------+ |
+| | o No             |### | 42  | |
+| | o Prob. Not      |##  | 28  | |
+| | o Open           |####| 67  | |
+| | o Will Prescribe |### | 45  | |
+| | o Prescribing    |##  | 38  | |
+| | o No result      |#   | 25  | |
+| +------------------------------+ |
+|                                  |
+| VISITS PER REP                   |
+| +------------------------------+ |
+| | Lamine                  127  | |
+| | 8 prescribing         visits | |
+| +------------------------------+ |
+| | Erling                   98  | |
+| | 5 prescribing         visits | |
+| +------------------------------+ |
+| | Kylian                   74  | |
+| | 3 prescribing         visits | |
+| +------------------------------+ |
+|                                  |
++----------------------------------+</pre>
+    <p><strong>KPIs:</strong> Total doctors, interactions, and prescribing doctors.</p>
+    <p><strong>Pipeline:</strong> Distribution by stage with proportional bars.</p>
+    <p><strong>Visits/Rep:</strong> Sorted by volume, with prescribing count.</p>
+  </div>
+
+  <div class="card">
+    <h3>How to Use the Data</h3>
+    <ul class="tip-list">
+      <li><strong>Compare reps:</strong> Identify best conversion rates</li>
+      <li><strong>Analyze pipeline:</strong> Many at "No"/"Open" = coaching needed</li>
+      <li><strong>No results:</strong> Many touches without result = different approach needed</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Admin ───────────────────────────────────────────────── -->
+<div class="role-section" id="en-adm">
+  <div class="role-header">
+    <span class="role-badge adm">ADM</span>
+    <h2>Admin</h2>
+  </div>
+
+  <div class="card">
+    <h3>Admin Hub</h3>
+<pre class="mockup">+----------------------------------+
+|        [ADMINISTRATION]          |
+|           V I S I T A S          |
+|                                  |
+|  +----------------------------+  |
+|  | [ppl]  TEAM              > |  |
+|  |        Rep performance      |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [cal]  SCHEDULES         > |  |
+|  |        Rep schedules        |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [med]  DOCTORS           > |  |
+|  |        All doctors/filters  |  |
+|  +----------------------------+  |
+|  +----------------------------+  |
+|  | [bar]  ACTIVITY          > |  |
+|  |        Full history         |  |
+|  +----------------------------+  |
+|                                  |
+|  View as:                        |
+|  (Admin) (Manager) (Analyst)     |
+|          (Rep)                   |
+|  [x Stop impersonation]         |
++----------------------------------+</pre>
+    <ol>
+      <li>Tap the role chip under <strong>View as:</strong></li>
+      <li>The screen changes to show that role's view</li>
+      <li>To return: <strong>Stop impersonation</strong> or tap Admin</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ── Permissions ─────────────────────────────────────────── -->
+<div class="role-section" id="en-perm">
+  <div class="role-header">
+    <h2>Permissions Summary</h2>
+  </div>
+  <div class="card">
+    <table class="perm-table">
+      <tr><th style="text-align:left">Feature</th><th>Rep</th><th>Mgr.</th><th>Ana.</th><th>Adm.</th></tr>
+      <tr><td>Log interaction</td><td>x</td><td></td><td></td><td>x</td></tr>
+      <tr><td>Submit expenses</td><td>x</td><td></td><td></td><td>x</td></tr>
+      <tr><td>View personal schedule</td><td>x</td><td></td><td></td><td>x</td></tr>
+      <tr><td>Flag a doctor</td><td>x</td><td>x</td><td>x</td><td>x</td></tr>
+      <tr><td>Remove flag (with note)</td><td>x</td><td>x</td><td>x</td><td>x</td></tr>
+      <tr><td>Edit doctor tags</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>View team/rep schedules</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Assign rep to doctor</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Schedule meeting</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Analytics dashboard</td><td></td><td></td><td>x</td><td>x</td></tr>
+      <tr><td>View all expenses</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Impersonate roles</td><td></td><td></td><td></td><td>x</td></tr>
+      <tr><td>Manage roles</td><td></td><td></td><td></td><td>x</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ── Glossary ────────────────────────────────────────────── -->
+<div class="role-section" id="en-gloss">
+  <div class="role-header">
+    <h2>Glossary</h2>
+  </div>
+  <div class="card">
+    <table>
+      <tr><th style="text-align:left">Term</th><th style="text-align:left">Meaning</th></tr>
+      <tr><td><strong>Touch</strong></td><td>A logged interaction between a rep and a doctor</td></tr>
+      <tr><td><strong>Propensity</strong></td><td>Score 1-5 indicating likelihood of prescribing</td></tr>
+      <tr><td><strong>Pipeline</strong></td><td>Current stage based on last interaction result</td></tr>
+      <tr><td><strong>Flag</strong></td><td>Marking a doctor for special follow-up</td></tr>
+      <tr><td><strong>Tag</strong></td><td>Managerial label assigned by Manager/Admin</td></tr>
+      <tr><td><strong>Result</strong></td><td>Code 1-5 logged after each interaction</td></tr>
+      <tr><td><strong>Expense</strong></td><td>Receipt submitted for reimbursement</td></tr>
+    </table>
+  </div>
+</div>
+
+</div><!-- /en -->
+
+</div><!-- /content -->
+
+<div class="footer">
+  VISITAS CRM &mdash; Entourage Lab &mdash; April 2026
+</div>
+
+</body>
+</html>

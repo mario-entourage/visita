@@ -105,6 +105,24 @@ export default function AppLayout() {
             ...headerDefaults,
           }}
         />
+        <Stack.Screen
+          name="admin/users"
+          options={{
+            headerShown: true,
+            title: 'Gerenciar Usuarios',
+            headerBackTitle: 'Voltar',
+            ...headerDefaults,
+          }}
+        />
+        <Stack.Screen
+          name="analytics/index"
+          options={{
+            headerShown: true,
+            title: 'Painel Analítico',
+            headerBackTitle: 'Voltar',
+            ...headerDefaults,
+          }}
+        />
       </Stack>
     </AuthGuard>
   );

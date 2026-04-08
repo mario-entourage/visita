@@ -3,6 +3,7 @@ import {
   View,
   Text,
   ScrollView,
+  TextInput,
   Pressable,
   Modal,
   ActivityIndicator,
@@ -22,6 +23,9 @@ import {
   getActiveDoctorsByStateQuery,
   assignRepToDoctor,
   reportDoctor,
+  unflagDoctorWithNote,
+  updateDoctorTags,
+  flagDoctorForFollowUp,
 } from '@/services/doctors.service';
 import {
   type ReportReason,
@@ -33,7 +37,7 @@ import { AssignRepDropdown } from '@/components/AssignRepDropdown';
 import { PropensityBadge } from '@/components/PropensityBadge';
 import { Timeline } from '@/components/Timeline';
 import { C, S } from '@/theme';
-import { RESULT_LABELS } from '@/lib/constants';
+import { RESULT_LABELS, DOCTOR_TAGS, DOCTOR_TAG_MAP } from '@/lib/constants';
 import type { Doctor } from '@/types/doctor';
 import type { Interaction } from '@/types/interaction';
 import type { Representante } from '@/types/representante';
@@ -51,6 +55,16 @@ export default function DoctorDetailScreen() {
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [selectedReason, setSelectedReason] = useState<ReportReason | null>(null);
   const [isReporting, setIsReporting] = useState(false);
+
+  // Unflag-with-note state
+  const [unflagModalVisible, setUnflagModalVisible] = useState(false);
+  const [unflagNote, setUnflagNote] = useState('');
+  const [isUnflagging, setIsUnflagging] = useState(false);
+
+  // Tag picker state (Gerente/admin only)
+  const [tagModalVisible, setTagModalVisible] = useState(false);
+  const [pendingTags, setPendingTags] = useState<Set<string>>(new Set());
+  const [isSavingTags, setIsSavingTags] = useState(false);
 
   // Load the doctor document first — other queries depend on it
   const doctorRef = useMemoFirebase(
@@ -139,6 +153,61 @@ export default function DoctorDetailScreen() {
     }
   }, [db, id, user, doctor, selectedReason]);
 
+  // ── Flag / Unflag handlers ──────────────────────────────────────────
+  const handleFlagDoctor = useCallback(async () => {
+    if (!db || !id) return;
+    try {
+      await flagDoctorForFollowUp(db, id, true);
+    } catch (err) {
+      console.error('Error flagging doctor:', err);
+    }
+  }, [db, id]);
+
+  const handleUnflag = useCallback(async () => {
+    if (!db || !id || !user || !unflagNote.trim()) return;
+    setIsUnflagging(true);
+    try {
+      await unflagDoctorWithNote(db, id, user.uid, unflagNote.trim());
+      setUnflagModalVisible(false);
+      setUnflagNote('');
+      const msg = 'Flag removido com sucesso.';
+      Platform.OS === 'web' ? alert(msg) : Alert.alert('Pronto', msg);
+    } catch (err) {
+      console.error('Error unflagging doctor:', err);
+      const errMsg = 'Não foi possível remover o flag.';
+      Platform.OS === 'web' ? alert(errMsg) : Alert.alert('Erro', errMsg);
+    } finally {
+      setIsUnflagging(false);
+    }
+  }, [db, id, user, unflagNote]);
+
+  // ── Tag picker handlers ─────────────────────────────────────────────
+  const openTagPicker = useCallback(() => {
+    setPendingTags(new Set(doctor?.tags ?? []));
+    setTagModalVisible(true);
+  }, [doctor?.tags]);
+
+  const toggleTag = (key: string) => {
+    setPendingTags((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
+
+  const handleSaveTags = useCallback(async () => {
+    if (!db || !id) return;
+    setIsSavingTags(true);
+    try {
+      await updateDoctorTags(db, id, Array.from(pendingTags));
+      setTagModalVisible(false);
+    } catch (err) {
+      console.error('Error saving tags:', err);
+    } finally {
+      setIsSavingTags(false);
+    }
+  }, [db, id, pendingTags]);
+
   if (doctorLoading) {
     return (
       <View style={styles.center}>
@@ -200,6 +269,60 @@ export default function DoctorDetailScreen() {
                   {doctor.totalTouches}{' '}
                   {doctor.totalTouches === 1 ? 'toque' : 'toques'}
                 </Text>
+              ) : null}
+            </View>
+
+            {/* Pipeline stage label */}
+            {doctor.lastInteractionResult ? (
+              <View style={[styles.pipelineLabel, {
+                backgroundColor: (doctor.lastInteractionResult >= 4 ? C.greenLight : doctor.lastInteractionResult === 3 ? C.amberLight : C.redLight),
+              }]}>
+                <Text style={[styles.pipelineLabelText, {
+                  color: doctor.lastInteractionResult >= 4 ? '#15803d' : doctor.lastInteractionResult === 3 ? '#854d0e' : '#b91c1c',
+                }]}>
+                  {RESULT_LABELS[doctor.lastInteractionResult]}
+                </Text>
+              </View>
+            ) : null}
+
+            {/* Doctor tags */}
+            {(doctor.tags ?? []).length > 0 ? (
+              <View style={styles.tagRow}>
+                {(doctor.tags ?? []).map((key) => {
+                  const tag = DOCTOR_TAG_MAP[key];
+                  if (!tag) return null;
+                  return (
+                    <View key={key} style={[styles.tagChip, { backgroundColor: tag.color + '22' }]}>
+                      <Text style={[styles.tagChipText, { color: tag.color }]}>{tag.abbr}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : null}
+
+            {/* Flag / Unflag button */}
+            <View style={styles.flagActionRow}>
+              {doctor.flaggedForFollowUp ? (
+                <Pressable
+                  style={styles.unflagBtn}
+                  onPress={() => setUnflagModalVisible(true)}
+                >
+                  <Ionicons name="flag" size={14} color={C.red} />
+                  <Text style={styles.unflagBtnText}>Remover Flag</Text>
+                </Pressable>
+              ) : (
+                <Pressable style={styles.flagBtn} onPress={handleFlagDoctor}>
+                  <Ionicons name="flag-outline" size={14} color={C.teal} />
+                  <Text style={styles.flagBtnText}>Sinalizar</Text>
+                </Pressable>
+              )}
+
+              {/* Tag edit button (manager/admin only) */}
+              {isManager ? (
+                <Pressable style={styles.tagEditBtn} onPress={openTagPicker}>
+                  <Ionicons name="pricetag-outline" size={14} color={C.teal} />
+                  <Text style={styles.tagEditBtnText}>Tags</Text>
+                </Pressable>
               ) : null}
             </View>
           </View>
@@ -413,6 +536,138 @@ export default function DoctorDetailScreen() {
                   <ActivityIndicator size="small" color={C.white} />
                 ) : (
                   <Text style={styles.confirmBtnText}>Enviar Relatório</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Unflag-with-note Modal ──────────────────────────────── */}
+      <Modal
+        visible={unflagModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setUnflagModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="flag" size={22} color={C.red} />
+              <Text style={styles.modalTitle}>Remover Sinalização</Text>
+            </View>
+            <Text style={styles.modalSubtitle}>
+              Explique por que está removendo o flag deste médico. Essa informação
+              será visível para o gerente.
+            </Text>
+
+            <TextInput
+              style={styles.unflagInput}
+              placeholder="Motivo da remoção do flag..."
+              placeholderTextColor={C.textLight}
+              value={unflagNote}
+              onChangeText={setUnflagNote}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.cancelBtn}
+                onPress={() => {
+                  setUnflagModalVisible(false);
+                  setUnflagNote('');
+                }}
+              >
+                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.confirmBtn,
+                  { backgroundColor: C.red },
+                  (!unflagNote.trim() || isUnflagging) && styles.confirmBtnDisabled,
+                ]}
+                onPress={handleUnflag}
+                disabled={!unflagNote.trim() || isUnflagging}
+              >
+                {isUnflagging ? (
+                  <ActivityIndicator size="small" color={C.white} />
+                ) : (
+                  <Text style={styles.confirmBtnText}>Remover Flag</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Tag Picker Modal (Manager/Admin) ───────────────────── */}
+      <Modal
+        visible={tagModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setTagModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="pricetags-outline" size={22} color={C.teal} />
+              <Text style={styles.modalTitle}>Tags do Médico</Text>
+            </View>
+            <Text style={styles.modalSubtitle}>
+              Selecione as tags que se aplicam a este médico.
+            </Text>
+
+            {DOCTOR_TAGS.map((tag) => {
+              const selected = pendingTags.has(tag.key);
+              return (
+                <Pressable
+                  key={tag.key}
+                  style={[
+                    styles.reasonRow,
+                    selected && { borderColor: tag.color, backgroundColor: tag.color + '15' },
+                  ]}
+                  onPress={() => toggleTag(tag.key)}
+                >
+                  <View style={[
+                    styles.checkBox,
+                    selected && { backgroundColor: tag.color, borderColor: tag.color },
+                  ]}>
+                    {selected ? (
+                      <Ionicons name="checkmark" size={13} color={C.white} />
+                    ) : null}
+                  </View>
+                  <Text style={[
+                    styles.reasonText,
+                    selected && { color: tag.color, fontWeight: '600' },
+                  ]}>
+                    {tag.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.cancelBtn}
+                onPress={() => setTagModalVisible(false)}
+              >
+                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.confirmBtn,
+                  { backgroundColor: C.teal },
+                  isSavingTags && styles.confirmBtnDisabled,
+                ]}
+                onPress={handleSaveTags}
+                disabled={isSavingTags}
+              >
+                {isSavingTags ? (
+                  <ActivityIndicator size="small" color={C.white} />
+                ) : (
+                  <Text style={styles.confirmBtnText}>Salvar Tags</Text>
                 )}
               </Pressable>
             </View>
@@ -771,5 +1026,109 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: C.white,
+  },
+  // ── Pipeline label ────────────────────────────────────────────────
+  pipelineLabel: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  pipelineLabelText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  // ── Tag chips ─────────────────────────────────────────────────────
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+  },
+  tagChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  tagChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  // ── Flag / Tag action row ─────────────────────────────────────────
+  flagActionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+  },
+  flagBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: C.teal,
+  },
+  flagBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: C.teal,
+  },
+  unflagBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: C.red,
+    backgroundColor: C.redLight,
+  },
+  unflagBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: C.red,
+  },
+  tagEditBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: C.teal,
+  },
+  tagEditBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: C.teal,
+  },
+  // ── Unflag input ──────────────────────────────────────────────────
+  unflagInput: {
+    backgroundColor: C.bg,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 14,
+    color: C.text,
+    minHeight: 80,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: C.border,
+  },
+  // ── Tag picker checkbox ───────────────────────────────────────────
+  checkBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: C.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 1,
+    flexShrink: 0,
   },
 });

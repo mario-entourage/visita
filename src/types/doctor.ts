@@ -27,6 +27,12 @@ export interface Doctor {
   lastInteractionResult?: number; // 1-5
   totalTouches?: number;
   flaggedForFollowUp?: boolean;
+  // Unflag audit trail (written when a rep removes the flag)
+  unflaggedBy?: string;       // repId who removed the flag
+  unflaggedAt?: Timestamp;
+  unflagNote?: string;        // required reason for removing flag
+  // Manager tags (predefined set, multi-select)
+  tags?: string[];
   source?: 'import' | 'field_entry';
   createdByRepId?: string;
   assignedRepId?: string;

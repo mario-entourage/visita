@@ -8,6 +8,14 @@
     "ignore": ["firebase.json", "**/.*"],
     "rewrites": [
       {
+        "source": "/guide",
+        "destination": "/guide/index.html"
+      },
+      {
+        "source": "/guide/",
+        "destination": "/guide/index.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

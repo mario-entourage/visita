@@ -57,6 +57,11 @@ service cloud.firestore {
                         && request.resource.data.diff(resource.data)
                              .affectedKeys()
                              .hasOnly(['assignedRepId', 'updatedAt']))
+                    // Managers can also update tags
+                    || (isManagerOrAdmin()
+                        && request.resource.data.diff(resource.data)
+                             .affectedKeys()
+                             .hasOnly(['assignedRepId', 'tags', 'updatedAt']))
                     || (isEntourageUser()
                         && request.resource.data.diff(resource.data)
                              .affectedKeys()
@@ -66,6 +71,19 @@ service cloud.firestore {
                                'lastInteractionResult',
                                'totalTouches',
                                'flaggedForFollowUp',
+                               'updatedAt'
+                             ]))
+                    // Reps can unflag a doctor with a required note
+                    || (isEntourageUser()
+                        && resource.data.flaggedForFollowUp == true
+                        && request.resource.data.flaggedForFollowUp == false
+                        && request.resource.data.diff(resource.data)
+                             .affectedKeys()
+                             .hasOnly([
+                               'flaggedForFollowUp',
+                               'unflaggedBy',
+                               'unflaggedAt',
+                               'unflagNote',
                                'updatedAt'
                              ]))
                     // Reps can set reported=true (flag as not at address); cannot clear it
@@ -150,10 +168,12 @@ service cloud.firestore {
     }
 
     // ── roles ─────────────────────────────────────────────────────────────────
-    // Each user can read their own role doc. Only admins can assign roles.
+    // Each user can read their own role doc. Admins can read all (for user management).
+    // Only admins can assign roles.
     // Fields: { role: 'representante'|'gerente'|'analista'|'admin' }
     match /roles/{userId} {
-      allow read: if isEntourageUser() && request.auth.uid == userId;
+      allow read: if isEntourageUser()
+                  && (request.auth.uid == userId || isAdmin());
       allow write: if isAdmin();
     }
 

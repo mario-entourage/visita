@@ -96,3 +96,13 @@ export function getInteractionsByRepQuery(
     limit(cap)
   );
 }
+
+/** All active interactions, ordered by creation date descending.
+ *  Used by the analista screen for aggregation. */
+export function getAllInteractionsQuery(db: Firestore): Query {
+  return query(
+    getInteractionsRef(db),
+    where('active', '==', true),
+    orderBy('createdAt', 'desc')
+  );
+}

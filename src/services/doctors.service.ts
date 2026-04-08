@@ -172,6 +172,45 @@ export async function flagDoctorForFollowUp(
   });
 }
 
+/**
+ * Unflag a doctor with a required note explaining why.
+ * Sets flaggedForFollowUp=false and writes the audit trail fields.
+ */
+export async function unflagDoctorWithNote(
+  db: Firestore,
+  doctorId: string,
+  repId: string,
+  note: string
+): Promise<void> {
+  await updateDoc(getDoctorRef(db, doctorId), {
+    flaggedForFollowUp: false,
+    unflaggedBy: repId,
+    unflaggedAt: serverTimestamp(),
+    unflagNote: note,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Doctor tags (Gerente/admin only)
+// ---------------------------------------------------------------------------
+
+import { VALID_TAG_KEYS } from '@/lib/constants';
+
+/** Replace a doctor's tags with a validated set. */
+export async function updateDoctorTags(
+  db: Firestore,
+  doctorId: string,
+  tags: string[]
+): Promise<void> {
+  // Filter to valid keys before writing — defensive against stale UI
+  const validTags = tags.filter((t) => VALID_TAG_KEYS.has(t));
+  await updateDoc(getDoctorRef(db, doctorId), {
+    tags: validTags,
+    updatedAt: serverTimestamp(),
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Doctor-not-at-address reporting (rep field action)
 // ---------------------------------------------------------------------------

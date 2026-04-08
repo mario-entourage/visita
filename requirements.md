@@ -569,7 +569,210 @@ Each rep card shows first-letter avatar with a unique color, name, and state. Ta
 
 ---
 
-### 2.16 Visit Detail
+### 2.16 Home Hub - Representante (updated with Expenses)
+
+The Representante hub now includes a fourth button:
+
+```
++----------------------------------+
+|  +----------------------------+  |
+|  | [receipt] DESPESAS        > |  |
+|  |  Enviar comprovantes        |  |
+|  +----------------------------+  |
++----------------------------------+
+```
+
+---
+
+### 2.17 Expense List
+
+```
++----------------------------------+
+| < Despesas                  [+]  |
++----------------------------------+
+| Total: R$ 342,50                 |
++----------------------------------+
+|                                  |
+| +------------------------------+ |
+| | [img] Combustível   R$ 85,00| |
+| |       12/03/2026             | |
+| +------------------------------+ |
+| +------------------------------+ |
+| | [img] Alimentação   R$ 32,50| |
+| |       12/03/2026             | |
+| +------------------------------+ |
+| +------------------------------+ |
+| | [img] Pedágio      R$ 25,00 | |
+| |       11/03/2026             | |
+| +------------------------------+ |
+|                                  |
+|               [+ Nova Despesa]   |
++----------------------------------+
+```
+
+---
+
+### 2.18 New Expense Form
+
+```
++----------------------------------+
+| < Nova Despesa                   |
++----------------------------------+
+|                                  |
+| +------------------------------+ |
+| |                              | |
+| |     [camera preview /       | |
+| |      receipt thumbnail]     | |
+| |                              | |
+| +------------------------------+ |
+| [Camera]          [Galeria]      |
+|                                  |
+| Valor (R$)                       |
+| +------------------------------+ |
+| |  0,00                        | |
+| +------------------------------+ |
+|                                  |
+| Categoria                        |
+| (Combust.) (Alim.) (Estac.)     |
+| (Pedagio)  (Outro)              |
+|                                  |
+| Observacoes (opcional)           |
+| +------------------------------+ |
+| |                              | |
+| +------------------------------+ |
+|                                  |
+| +------------------------------+ |
+| |      Enviar Despesa          | |
+| +------------------------------+ |
++----------------------------------+
+```
+
+**Expense categories:**
+- Combustível (fuel)
+- Alimentação (meals)
+- Estacionamento (parking)
+- Pedágio (tolls)
+- Outro (other)
+
+**On submit:** Uploads receipt image to Firebase Storage at `expenses/{repId}/{timestamp}.{ext}`, then creates Firestore doc with amount, category, optional notes, and receipt URL.
+
+---
+
+### 2.19 Doctor Detail — Pipeline Stage & Tags
+
+The doctor detail header now shows:
+- **Pipeline stage label** — colored badge showing the doctor's last interaction result (Não → Prescrevendo)
+- **Tag chips** — abbreviated colored chips showing manager-assigned tags
+- **Flag/Unflag button** — one-tap to flag; bottom sheet with required note to unflag
+- **Tags button** (Gerente/admin only) — opens multi-select tag picker
+
+```
++----------------------------------+
+| < Dr. Sarah Walker               |
++----------------------------------+
+| Sarah Walker                     |
+| ortopedista                      |
+| [Propensity: 4/5]  12 toques    |
+| [Vai Prescrever]                 |  <- pipeline badge
+| [P.Alto] [F.Op.]                |  <- tag chips
+| [flag: Remover Flag] [Tags]     |  <- action buttons
++----------------------------------+
+```
+
+**Unflag bottom sheet:**
+```
++----------------------------------+
+| [flag] Remover Sinalizacao       |
+|                                  |
+| Explique por que esta removendo  |
+| o flag deste medico.             |
+|                                  |
+| +------------------------------+ |
+| | Motivo da remocao do flag... | |
+| +------------------------------+ |
+|                                  |
+| [Cancelar]  [Remover Flag]      |
++----------------------------------+
+```
+
+**Tag picker (Gerente/admin):**
+```
++----------------------------------+
+| [tags] Tags do Medico            |
+|                                  |
+| Selecione as tags:               |
+|                                  |
+| [x] Potencial Alto              |
+| [ ] Nova Clinica                 |
+| [ ] Visita Conjunta              |
+| [ ] Prioritario                  |
+| [x] Formador de Opiniao          |
+| [ ] Risco de Inatividade         |
+|                                  |
+| [Cancelar]  [Salvar Tags]       |
++----------------------------------+
+```
+
+---
+
+### 2.20 Doctor Card — Pipeline & Tags
+
+Each doctor card in the list now shows:
+- Pipeline stage badge (colored, based on lastInteractionResult)
+- Abbreviated tag chips (e.g., "P.Alto", "F.Op.")
+
+```
++------------------------------+
+| Dr. Sarah Walker       [4/5] |
+| ortopedista            12 tq |
+| Sao Paulo, SP                |
+| [Vai Prescrever]             |
+| [P.Alto] [F.Op.]            |
+| Ultima visita: 2 dias atras |
++------------------------------+
+```
+
+---
+
+### 2.21 Analista Dashboard
+
+```
++----------------------------------+
+| < Painel Analitico               |
++----------------------------------+
+|                                  |
+| +--------+ +--------+ +--------+|
+| | [ppl]  | | [pen]  | | [chk]  ||
+| |  245   | |  1,842 | |   38   ||
+| |Medicos | |Interac.| |Prescr. ||
+| +--------+ +--------+ +--------+|
+|                                  |
+| PIPELINE DE MEDICOS              |
+| +------------------------------+ |
+| | o Nao           |###  | 42  | |
+| | o Prov. Nao     |##   | 28  | |
+| | o Aberto        |#### | 67  | |
+| | o Vai Prescrever|###  | 45  | |
+| | o Prescrevendo  |##   | 38  | |
+| +------------------------------+ |
+|                                  |
+| VISITAS POR REPRESENTANTE        |
+| +------------------------------+ |
+| | Lamine                  127  | |
+| | 8 prescrevendo         visits| |
+| +------------------------------+ |
+| +------------------------------+ |
+| | Erling                   98  | |
+| | 5 prescrevendo         visits| |
+| +------------------------------+ |
++----------------------------------+
+```
+
+**Aggregation:** Client-side. Reads all interactions, all doctors, all reps. Groups by rep to compute visit counts and prescribing doctors (resultCode=5). Computes pipeline distribution from doctors' `lastInteractionResult`.
+
+---
+
+### 2.22 Visit Detail
 
 ```
 +----------------------------------+
@@ -603,9 +806,12 @@ Each rep card shows first-letter avatar with a unique color, name, and state. Ta
 | `interactions`     | Rep-doctor interaction records               |
 | `scheduled_visits` | Calendar entries for upcoming visits         |
 | `representantes`   | Sales rep profiles                           |
+| `expenses`         | Rep expense reimbursement records            |
+| `doctor_reports`   | Doctor "not at address" reports              |
 | `action_items`     | Followup tasks generated from interactions   |
 | `roles`            | User role assignments                        |
 | `roles_admin`      | Legacy admin flag (exists = admin)           |
+| `weekly_goals`     | Manager-set weekly visit targets for reps    |
 
 ### 3.2 Doctor
 
@@ -628,6 +834,16 @@ Each rep card shows first-letter avatar with a unique color, name, and state. Ta
 | `lastInteractionResult`| number?    | 1-5, CRM-computed            |
 | `totalTouches`         | number?    | CRM-computed                 |
 | `flaggedForFollowUp`   | boolean?   | CRM-computed                 |
+| `unflaggedBy`          | string?    | repId who removed the flag   |
+| `unflaggedAt`          | Timestamp? | When flag was removed        |
+| `unflagNote`           | string?    | Required reason for unflag   |
+| `tags`                 | string[]?  | Manager-assigned tags        |
+| `reported`             | boolean?   | Flagged as not at address    |
+| `reportedAt`           | Timestamp? | When report was filed        |
+| `reportedBy`           | string?    | repId who filed the report   |
+| `reportedReason`       | string?    | Report reason category       |
+| `assignedRepId`        | string?    | FK to assigned rep           |
+| `createdByRepId`       | string?    | FK to rep who created doctor |
 | `createdAt`            | Timestamp  |                              |
 | `updatedAt`            | Timestamp  |                              |
 | `removedAt`            | Timestamp? | Soft delete                  |
@@ -669,7 +885,47 @@ Each rep card shows first-letter avatar with a unique color, name, and state. Ta
 | `createdAt`             | Timestamp   |                            |
 | `updatedAt`             | Timestamp   |                            |
 
-### 3.5 Representante
+### 3.5 Expense
+
+| Field         | Type            | Notes                                     |
+|---------------|-----------------|-------------------------------------------|
+| `id`          | string          | Auto-generated                            |
+| `repId`       | string          | Firebase Auth UID                         |
+| `amount`      | number          | Value in BRL cents                        |
+| `category`    | ExpenseCategory | combustivel/alimentacao/estacionamento/pedagio/outro |
+| `receiptUrl`  | string          | Firebase Storage download URL             |
+| `notes`       | string?         | Optional description                      |
+| `active`      | boolean         |                                           |
+| `createdAt`   | Timestamp       |                                           |
+| `updatedAt`   | Timestamp       |                                           |
+
+### 3.6 DoctorReport
+
+| Field         | Type          | Notes                                      |
+|---------------|---------------|--------------------------------------------|
+| `id`          | string        | Auto-generated                             |
+| `doctorId`    | string        | FK to doctors                              |
+| `repId`       | string        | Firebase Auth UID                          |
+| `repName`     | string        | Denormalized                               |
+| `doctorName`  | string        | Denormalized                               |
+| `reason`      | ReportReason  | mudou_endereco/nao_encontrado/aposentou/fechou/outro |
+| `resolved`    | boolean       | Marked resolved by admin                   |
+| `active`      | boolean       |                                            |
+| `createdAt`   | Timestamp     |                                            |
+| `updatedAt`   | Timestamp     |                                            |
+
+### 3.7 WeeklyGoal
+
+| Field         | Type          | Notes                                      |
+|---------------|---------------|--------------------------------------------|
+| `id`          | string        | Auto-generated                             |
+| `repId`       | string        | FK to auth user                            |
+| `weekStart`   | Timestamp     | Monday of the target week                  |
+| `target`      | number        | Number of visits expected                  |
+| `active`      | boolean       |                                            |
+| `createdAt`   | Timestamp     |                                            |
+
+### 3.8 Representante
 
 | Field       | Type       | Notes                         |
 |-------------|------------|-------------------------------|
@@ -684,7 +940,7 @@ Each rep card shows first-letter avatar with a unique color, name, and state. Ta
 | `updatedAt` | Timestamp  |                               |
 | `removedAt` | Timestamp? | Soft delete                   |
 
-### 3.6 Roles
+### 3.9 Roles
 
 | Field  | Type     | Notes                                          |
 |--------|----------|-------------------------------------------------|
@@ -717,7 +973,39 @@ Document ID = Firebase Auth UID.
 
 ---
 
-## 6. Propensity Score
+## 6. Doctor Tags
+
+Tags are a predefined set of labels that Gerentes and Admins can assign to doctors. Reps can see tags but cannot edit them. Tags are multi-select (a doctor can have multiple tags).
+
+| Key                 | Label (PT)            | Abbreviation | Color   |
+|---------------------|-----------------------|--------------|---------|
+| `potencial-alto`    | Potencial Alto        | P.Alto       | #22c55e |
+| `nova-clinica`      | Nova Clínica          | N.Cli        | #3b82f6 |
+| `visita-conjunta`   | Visita Conjunta       | V.Conj       | #8b5cf6 |
+| `prioritario`       | Prioritário           | Prior.       | #ef4444 |
+| `formador-opiniao`  | Formador de Opinião   | F.Op.        | #f59e0b |
+| `risco-inatividade` | Risco de Inatividade  | Risco        | #6b7280 |
+
+On mobile, abbreviated labels are shown. Full labels are shown in bottom sheets and pickers.
+
+**Validation:** Only keys from the predefined set are accepted. The client filters through `VALID_TAG_KEYS` before writing to Firestore.
+
+---
+
+## 7. Flag / Unflag Behavior
+
+**Flagging** (adding a flag) is a one-tap action available to all roles. It sets `flaggedForFollowUp = true` on the doctor.
+
+**Unflagging** (removing a flag) requires the user to provide a written note explaining why the flag is being removed. This creates an audit trail:
+- `unflaggedBy` — the repId who removed the flag
+- `unflaggedAt` — timestamp
+- `unflagNote` — required text explanation
+
+The Gerente can see the audit trail to understand why flags were removed.
+
+---
+
+## 8. Propensity Score
 
 | Score | Label (PT)   |
 |-------|--------------|
@@ -729,11 +1017,15 @@ Document ID = Firebase Auth UID.
 
 ---
 
-## 7. Security Rules Summary
+## 9. Security Rules Summary
 
 - All access requires `@entouragelab.com` domain
 - Reps can read all doctors, create own interactions
 - Reps can only update CRM-computed fields on doctors
+- Reps can unflag doctors only with a required note (audit trail)
+- Managers can update `assignedRepId` and `tags` on doctors
+- Reps can create and read their own expenses; managers can read all expenses
+- Reps can report doctors as "not at address"; managers/analysts can view reports
 - Reps can read only their own scheduled visits
 - Admins have full CRUD on all collections
 - Role assignments controlled by admin/super-admin
@@ -741,7 +1033,7 @@ Document ID = Firebase Auth UID.
 
 ---
 
-## 8. Non-Functional Requirements
+## 10. Non-Functional Requirements
 
 | Requirement        | Target                                                        |
 |--------------------|---------------------------------------------------------------|
@@ -757,7 +1049,7 @@ Document ID = Firebase Auth UID.
 
 ---
 
-## 9. Risks
+## 11. Risks
 
 ### Data quality depends on rep discipline
 
@@ -781,7 +1073,7 @@ GPS capture on interaction submit is best-effort. iOS aggressively limits backgr
 
 ---
 
-## 10. Constraints
+## 12. Constraints
 
 | Constraint                  | Implication                                                     |
 |-----------------------------|-----------------------------------------------------------------|
@@ -795,7 +1087,18 @@ GPS capture on interaction submit is best-effort. iOS aggressively limits backgr
 
 ---
 
-## 11. Future / Planned Features
+## 13. Future / Planned Features
+
+### Recently shipped
+- [x] Expense reimbursement — photo capture, upload to Firebase Storage, category + amount tracking
+- [x] Doctor pipeline stage labels — visual badge on DoctorCard and detail screen
+- [x] Multi-tags — predefined set of 6, Gerente/admin only, abbreviated on mobile
+- [x] Unflag-with-note — asymmetric flag/unflag, required note on removal with audit trail
+- [x] Analista dashboard — top-line KPIs, pipeline distribution, per-rep visit/conversion stats
+- [x] Doctor "not at address" reporting — reps can report, managers/analysts can review
+- [x] Rep-created doctors — reps can add doctors directly from the field
+- [x] Manager: assign reps to doctors
+- [x] Manager: schedule meetings for reps
 
 ### From mockups (designed, not yet built)
 - [ ] Weekly performance dashboard for managers (rep grid with daily stats)
@@ -813,6 +1116,8 @@ GPS capture on interaction submit is best-effort. iOS aggressively limits backgr
 - [ ] Propensity score model (currently placeholder, needs real algorithm)
 - [ ] Batch doctor import from external data sources
 - [ ] Interaction edit/delete with audit trail
+- [ ] CAC/LTV visibility (requires Vendas app integration)
+- [ ] Doctor visits-per-sale metric (data exists, needs aggregation view)
 
 ### Long-term (exploratory)
 - [ ] AI-suggested visit priorities based on interaction history and propensity

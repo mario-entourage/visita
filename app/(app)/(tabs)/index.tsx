@@ -57,6 +57,12 @@ const BUTTONS_BY_ROLE: Record<UserRole, HubButton[]> = {
   ],
   gerente: [
     {
+      icon: 'create-outline',
+      label: 'ENVIAR VISITA',
+      sub: 'Registrar nova interação',
+      route: '/(app)/(tabs)/log',
+    },
+    {
       icon: 'people-outline',
       label: 'EQUIPE',
       sub: 'Ver desempenho dos reps',
@@ -80,7 +86,7 @@ const BUTTONS_BY_ROLE: Record<UserRole, HubButton[]> = {
       icon: 'bar-chart-outline',
       label: 'RELATÓRIOS',
       sub: 'Dados e análises',
-      route: '/(app)/(tabs)/schedule',
+      route: '/(app)/analytics/index',
     },
     {
       icon: 'medkit-outline',
@@ -119,6 +125,12 @@ const BUTTONS_BY_ROLE: Record<UserRole, HubButton[]> = {
       label: 'ATIVIDADE',
       sub: 'Histórico geral de visitas',
       route: '/(app)/(tabs)/schedule',
+    },
+    {
+      icon: 'shield-checkmark-outline',
+      label: 'USUÁRIOS',
+      sub: 'Gerenciar perfis e acessos',
+      route: '/(app)/admin/users',
     },
   ],
 };

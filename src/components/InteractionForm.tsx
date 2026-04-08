@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,13 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
+  useWindowDimensions,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Ionicons } from '@expo/vector-icons';
-import { RESULT_LABELS, INTERACTION_TYPE_LABELS } from '@/lib/constants';
+import { INTERACTION_TYPE_LABELS } from '@/lib/constants';
 import type { InteractionType } from '@/types/interaction';
 import { formatTimestamp } from '@/lib/utils';
 import { C, RESULT_COLORS, S } from '@/theme';
@@ -49,10 +50,97 @@ interface InteractionFormProps {
   isHintLoading?: boolean;
 }
 
-const RESULTS = Object.entries(RESULT_LABELS).map(([k, v]) => ({
-  value: Number(k),
-  label: v,
-}));
+// ---------------------------------------------------------------------------
+// Responsive result labels — "shorten the longest first" algorithm
+// ---------------------------------------------------------------------------
+
+// Each inner array is the label's abbreviation sequence, full → most abbreviated.
+// Index 0 is always the full label.
+const LABEL_STEPS: string[][] = [
+  // 1 – Não (never shortened)
+  ['Não'],
+  // 2 – Provavelmente Não
+  [
+    'Provavelmente Não',
+    'Provavelment. Não',
+    'Provavelmnt. Não',
+    'Provavelmt. Não',
+    'Provavlmt. Não',
+    'Provavmt. Não',
+    'Provamt. Não',
+    'Provmt. Não',
+    'Provt. Não',
+    'Prot. Não',
+    'Pr. Não',
+  ],
+  // 3 – Aberto
+  ['Aberto', 'Abrto.', 'Abto.'],
+  // 4 – Vai Prescrever
+  [
+    'Vai Prescrever',
+    'Vai Prescrevr.',
+    'Vai Prescrev.',
+    'Vai Prescre.',
+    'Vai Prescr.',
+    'Vai Presc.',
+    'Vai Pres.',
+    'Vai Pre.',
+    'Vai Pr.',
+  ],
+  // 5 – Prescrevendo
+  [
+    'Prescrevendo',
+    'Prescrvendo.',
+    'Prescrvndo.',
+    'Prescrndo.',
+    'Prescrnd.',
+    'Prescnd.',
+    'Presnd.',
+    'Prndo.',
+  ],
+];
+
+// Characters excluding periods — the metric the algorithm operates on
+function nonPeriodLen(s: string): number {
+  return s.replace(/\./g, '').length;
+}
+
+// Estimated pixel width of the full chip row at a given set of labels.
+// paddingHorizontal:12 × 2 = 24px per chip; gap:8 between 5 chips = 32px total.
+const CHAR_PX = 7.5; // fontSize:12 fontWeight:'600'
+const CHIP_PADDING_PX = 24;
+const CHIP_GAP_PX = 8;
+
+function estimateRowPx(labels: string[]): number {
+  return (
+    labels.reduce((sum, l) => sum + nonPeriodLen(l) * CHAR_PX + CHIP_PADDING_PX, 0) +
+    CHIP_GAP_PX * (labels.length - 1)
+  );
+}
+
+// Returns the label set that fits within `availablePx`, shortening longest first.
+function selectLabels(availablePx: number): string[] {
+  const idx = LABEL_STEPS.map(() => 0);
+  const current = () => LABEL_STEPS.map((steps, i) => steps[idx[i]]);
+
+  while (estimateRowPx(current()) > availablePx) {
+    let best = -1;
+    let bestLen = -1;
+    LABEL_STEPS.forEach((steps, i) => {
+      if (idx[i] < steps.length - 1) {
+        const len = nonPeriodLen(steps[idx[i]]);
+        if (len > bestLen) {
+          bestLen = len;
+          best = i;
+        }
+      }
+    });
+    if (best === -1) break; // all labels at minimum
+    idx[best]++;
+  }
+
+  return current();
+}
 
 export function InteractionForm({
   onSubmit,
@@ -61,6 +149,14 @@ export function InteractionForm({
   lastInteraction,
   isHintLoading,
 }: InteractionFormProps) {
+  const { width } = useWindowDimensions();
+  // section paddingHorizontal:16 × 2 + card padding:14 × 2 = 60px overhead
+  const availablePx = width - 60;
+  const RESULTS = useMemo(
+    () => selectLabels(availablePx).map((label, i) => ({ value: i + 1, label })),
+    [availablePx]
+  );
+
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [otherChecked, setOtherChecked] = useState(false);
 
