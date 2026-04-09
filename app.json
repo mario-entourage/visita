@@ -50,7 +50,8 @@
           "locationWhenInUsePermission": "VISITA usa sua localização para registrar automaticamente onde ocorreu a interação com o médico."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-community/datetimepicker"
     ]
   }
 }

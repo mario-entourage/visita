@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { Interaction } from '@/types/interaction';
 import { INTERACTION_TYPE_LABELS, RESULT_LABELS } from '@/lib/constants';
-import { formatTimestamp } from '@/lib/utils';
+import { formatTimestamp, effectiveDate, hasLag } from '@/lib/utils';
 
 interface TimelineProps {
   interactions: (Interaction & { id: string })[];
@@ -17,9 +17,13 @@ export function Timeline({ interactions }: TimelineProps) {
     );
   }
 
+  const sorted = [...interactions].sort(
+    (a, b) => effectiveDate(b).toMillis() - effectiveDate(a).toMillis()
+  );
+
   return (
     <View style={styles.container}>
-      {interactions.map((interaction, index) => (
+      {sorted.map((interaction, index) => (
         <View key={interaction.id} style={styles.item}>
           <View style={styles.dotColumn}>
             <View style={styles.dot} />
@@ -32,9 +36,18 @@ export function Timeline({ interactions }: TimelineProps) {
             <Text style={styles.result}>
               {RESULT_LABELS[interaction.resultCode] ?? `Código ${interaction.resultCode}`}
             </Text>
-            <Text style={styles.date}>
-              {formatTimestamp(interaction.createdAt, 'dd/MM/yyyy HH:mm')}
-            </Text>
+            {hasLag(interaction) ? (
+              <Text style={styles.date}>
+                {'Visita: '}
+                {formatTimestamp(interaction.visitDate, 'dd/MM/yyyy')}
+                {'  ·  Registrado: '}
+                {formatTimestamp(interaction.createdAt, 'dd/MM/yyyy')}
+              </Text>
+            ) : (
+              <Text style={styles.date}>
+                {formatTimestamp(effectiveDate(interaction), 'dd/MM/yyyy HH:mm')}
+              </Text>
+            )}
             {interaction.notes ? (
               <Text style={styles.notes} numberOfLines={2}>
                 {interaction.notes}

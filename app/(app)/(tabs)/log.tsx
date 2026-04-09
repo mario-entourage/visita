@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { GeoPoint } from 'firebase/firestore';
+import { GeoPoint, Timestamp } from 'firebase/firestore';
 import { useFirestore, useUser, useMemoFirebase } from '@/firebase/provider';
 import { useCollection } from '@/firebase/use-collection';
 import {
@@ -85,6 +85,7 @@ export default function LogScreen() {
         resultCode: data.resultCode,
         preVisitNotes: data.preVisitNotes || undefined,
         postVisitNotes: data.postVisitNotes || undefined,
+        visitDate: data.visitDate ? Timestamp.fromDate(data.visitDate) : undefined,
         location,
         active: true,
         // Visit detail fields (optional)

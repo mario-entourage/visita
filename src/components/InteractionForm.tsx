@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { INTERACTION_TYPE_LABELS } from '@/lib/constants';
 import type { InteractionType } from '@/types/interaction';
 import { formatTimestamp } from '@/lib/utils';
+import { DateField } from '@/components/DateField';
 import { C, RESULT_COLORS, S } from '@/theme';
 import type { Doctor } from '@/types/doctor';
 import type { Interaction } from '@/types/interaction';
@@ -24,6 +25,9 @@ const interactionSchema = z.object({
   preVisitNotes: z.string(),
   resultCode: z.number().min(1).max(5),
   postVisitNotes: z.string(),
+  // visitDate: when the visit happened. Defaults to today; unlimited backdating allowed.
+  // .refine() (not .max()) so the check runs at submit time, not module load.
+  visitDate: z.date().refine((d) => d <= new Date(), { message: 'Futuro não permitido' }),
   // Visit detail fields
   visitType: z.enum(['field_visit', 'clinical_event', 'congress', 'digital']).optional(),
   samplesDelivered: z.boolean().optional(),
@@ -171,6 +175,8 @@ export function InteractionForm({
       preVisitNotes: '',
       resultCode: 3,
       postVisitNotes: '',
+      // Initialize to today so reps who never open DETALHES still submit with visitDate set
+      visitDate: new Date(),
       visitType: undefined,
       samplesDelivered: false,
       spokeFaceToFace: false,
@@ -366,6 +372,30 @@ export function InteractionForm({
 
       {detailsOpen ? (
         <View style={styles.detailsContent}>
+
+          {/* Data da visita — top of DETALHES, defaults to today */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Data da visita</Text>
+            <View style={styles.card}>
+              <Controller
+                control={control}
+                name="visitDate"
+                render={({ field: { onChange, value } }) => (
+                  <DateField
+                    value={value}
+                    onChange={onChange}
+                    maxDate={new Date()}
+                  />
+                )}
+              />
+              <Text style={styles.fieldHint}>
+                Padrão: hoje. Toque para retroagir a data.
+              </Text>
+              {errors.visitDate ? (
+                <Text style={styles.error}>{errors.visitDate.message}</Text>
+              ) : null}
+            </View>
+          </View>
 
           {/* Visit type chips */}
           <View style={styles.section}>
@@ -820,6 +850,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: C.border,
     paddingVertical: 4,
+  },
+  fieldHint: {
+    fontSize: 11,
+    color: C.textLight,
+    marginTop: 6,
   },
   error: {
     color: C.red,

@@ -67,11 +67,13 @@ export async function softDeleteInteraction(
 // Queries
 // ---------------------------------------------------------------------------
 
-/** Last N interactions for a doctor's timeline. Default cap: 20. */
+/** Last N interactions for a doctor's timeline. Default cap: 50.
+ *  Raised from 20 — with visitDate client-side sort, a lower cap silently drops
+ *  entries mid-timeline for doctors with long rep relationships. */
 export function getInteractionsByDoctorQuery(
   db: Firestore,
   doctorId: string,
-  cap = 20
+  cap = 50
 ): Query {
   return query(
     getInteractionsRef(db),

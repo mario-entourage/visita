@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import * as Location from 'expo-location';
-import { GeoPoint } from 'firebase/firestore';
+import { GeoPoint, Timestamp } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase/provider';
 import { createInteraction } from '@/services/interactions.service';
 import { recordInteractionOnDoctor } from '@/services/doctors.service';
@@ -48,6 +48,7 @@ export default function NewInteractionScreen() {
         resultCode: data.resultCode,
         preVisitNotes: data.preVisitNotes || undefined,
         postVisitNotes: data.postVisitNotes || undefined,
+        visitDate: data.visitDate ? Timestamp.fromDate(data.visitDate) : undefined,
         location,
         active: true,
         // Visit detail fields

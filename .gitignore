@@ -41,3 +41,9 @@ yarn-error.*
 /ios
 /android
 .gstack/
+
+# Firebase
+.firebase/
+firestore-debug.log
+ui-debug.log
+database-debug.log

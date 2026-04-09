@@ -17,7 +17,8 @@ export interface Interaction {
   doctorName?: string; // Denormalized for offline display
   repName?: string;   // Denormalized
   active: boolean;
-  createdAt: Timestamp;
+  visitDate?: Timestamp; // when the visit happened (user-set, defaults today)
+  createdAt: Timestamp;  // when it was logged (server timestamp, immutable)
   updatedAt: Timestamp;
   // Extended detail fields — optional, shown in expanded section
   isPrescriber?: boolean;
