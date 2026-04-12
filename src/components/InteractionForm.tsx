@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
     color: C.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   card: {
     backgroundColor: C.card,
