@@ -360,6 +360,9 @@ The admin needs his role to be a superset of everything. He should be able to se
 | red  org yel grn tea            |
 |                                  |
 | Detalhes                         |
+| Data da visita      [09/04/2026] |
+| Padrao: hoje. Toque para         |
+| retroagir a data.                |
 | Amostras entregues     [toggle] |
 | Falou pessoalmente     [toggle] |
 | Follow-up agendado     [toggle] |
@@ -383,9 +386,14 @@ The admin needs his role to be a superset of everything. He should be able to se
 4. Vai Prescrever (green)
 5. Prescrevendo (teal)
 
+**Visit date (visitDate):**
+- Defaults to today. Rep can tap to select any past date.
+- Future dates are blocked at form level (zod `.refine()`) and server level (Firestore rule: `visitDate <= request.time`).
+- If the rep logs a Monday visit on Wednesday, `visitDate` = Monday, `createdAt` = Wednesday (immutable server timestamp).
+
 **On submit:**
 - Captures GPS location (if permission granted)
-- Creates interaction doc in Firestore
+- Creates interaction doc in Firestore with `visitDate` (if different from today) and `createdAt` (always server timestamp)
 - Updates doctor's `totalTouches`, `lastInteractionAt`, `lastInteractionResult`
 
 ---
@@ -865,8 +873,11 @@ Each doctor card in the list now shows:
 | `doctorName`         | string?        | Denormalized                |
 | `repName`            | string?        | Denormalized                |
 | `active`             | boolean        |                             |
-| `createdAt`          | Timestamp      |                             |
+| `visitDate`          | Timestamp?     | When the visit happened (user-set, defaults today). Must be ≤ createdAt. Future dates blocked by Firestore rule. |
+| `createdAt`          | Timestamp      | When the record was logged (server timestamp, immutable) |
 | `updatedAt`          | Timestamp      |                             |
+
+**Effective date logic:** `effectiveDate(i) = i.visitDate ?? i.createdAt`. The timeline sorts by `effectiveDate` descending. When `createdAt − visitDate > 5 minutes`, the timeline card shows both dates: "Visita: DD/MM · Registrado: DD/MM".
 
 ### 3.4 ScheduledVisit
 
@@ -1090,6 +1101,7 @@ GPS capture on interaction submit is best-effort. iOS aggressively limits backgr
 ## 13. Future / Planned Features
 
 ### Recently shipped
+- [x] Visit backdate — reps can set `visitDate` separate from `createdAt`; timeline sorts by effectiveDate; dual-date display when lag > 5 min; future dates blocked at UI and Firestore rule level
 - [x] Expense reimbursement — photo capture, upload to Firebase Storage, category + amount tracking
 - [x] Doctor pipeline stage labels — visual badge on DoctorCard and detail screen
 - [x] Multi-tags — predefined set of 6, Gerente/admin only, abbreviated on mobile

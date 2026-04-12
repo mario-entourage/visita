@@ -142,6 +142,9 @@ Isso cria um registro de auditoria visivel para o gerente.
 |                                  |
 | + Mais detalhes                  |
 | ................................ |
+| . Data da visita [09/04/2026]. . |
+| . Padrao: hoje. Toque para     . |
+| . retroagir a data.            . |
 | . Amostras entregues   [toggle]. |
 | . Falou pessoalmente   [toggle]. |
 | . Follow-up agendado   [toggle]. |
@@ -166,11 +169,24 @@ Isso cria um registro de auditoria visivel para o gerente.
    - **3** — Aberto (amarelo)
    - **4** — Vai Prescrever (verde)
    - **5** — Prescrevendo (teal)
-4. Marque os detalhes opcionais: amostras entregues, falou pessoalmente, follow-up agendado
-5. Adicione anotacoes se necessario
-6. Toque em **Registrar Interacao**
+4. **Data da visita** — por padrao ja vem com a data de hoje. Para retroagir (ex: visita de segunda registrada na quarta), toque no campo e selecione a data correta. Datas futuras nao sao permitidas.
+5. Marque os detalhes opcionais: amostras entregues, falou pessoalmente, follow-up agendado
+6. Adicione anotacoes se necessario
+7. Toque em **Registrar Interacao**
 
 A localizacao GPS e capturada automaticamente (se permitido).
+
+**Visitas retroativas no historico:**
+
+Quando a data da visita e diferente da data de registro (mais de 5 minutos de diferenca), o historico mostra as duas datas:
+
+```
+o  Visita de Campo
+|  Resultado: 4 - Vai Prescrever
+|  Visita: 07/04/2026  ·  Registrado: 09/04/2026
+```
+
+Quando a visita foi registrada no mesmo dia, aparece apenas uma data (como sempre foi).
 
 ### Lista de Medicos
 
@@ -748,6 +764,7 @@ Isso e util para:
 | **Tag** | Rotulo gerencial atribuido pelo Gerente/Admin |
 | **Resultado** | Codigo 1-5 registrado apos cada interacao |
 | **Despesa** | Comprovante de gasto para reembolso |
+| **Data da Visita** | Quando a visita aconteceu (pode ser retroativa); diferente de "Registrado em" que e quando o rep abriu o app |
 
 ---
 ---
@@ -888,6 +905,9 @@ This creates an audit trail visible to the manager.
 |                                  |
 | + More details                   |
 | ................................ |
+| . Visit date      [04/09/2026] . |
+| . Default: today. Tap to set   . |
+| . an earlier date.             . |
 | . Samples delivered    [toggle]. |
 | . Spoke face to face   [toggle]. |
 | . Follow-up scheduled  [toggle]. |
@@ -912,11 +932,24 @@ This creates an audit trail visible to the manager.
    - **3** — Open (yellow)
    - **4** — Will Prescribe (green)
    - **5** — Prescribing (teal)
-4. Toggle optional details: samples delivered, spoke face to face, follow-up scheduled
-5. Add notes if needed
-6. Tap **Log Interaction**
+4. **Visit date** — defaults to today. Tap to set an earlier date (e.g., logging a Monday visit on Wednesday). Future dates are not allowed.
+5. Toggle optional details: samples delivered, spoke face to face, follow-up scheduled
+6. Add notes if needed
+7. Tap **Log Interaction**
 
 GPS location is captured automatically (if permission granted).
+
+**Backdated visits in the timeline:**
+
+When a visit date differs from the log date by more than 5 minutes, the history card shows both:
+
+```
+o  Field Visit
+|  Result: 4 - Will Prescribe
+|  Visit: 04/07/2026  ·  Logged: 04/09/2026
+```
+
+When the visit was logged the same day, only one date is shown (as always).
 
 ### Doctor List
 
