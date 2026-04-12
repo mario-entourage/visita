@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import type { Interaction } from '@/types/interaction';
 import { INTERACTION_TYPE_LABELS, RESULT_LABELS } from '@/lib/constants';
 import { formatTimestamp, effectiveDate, hasLag, sortByEffectiveDate } from '@/lib/utils';
+import { C } from '@/theme';
 
 interface TimelineProps {
   interactions: (Interaction & { id: string })[];
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: '#9ca3af',
+    color: C.textLight,
     fontSize: 14,
   },
   item: {
@@ -83,13 +84,13 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#3b82f6',
+    backgroundColor: C.teal,
     marginTop: 4,
   },
   line: {
     width: 2,
     flex: 1,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: C.border,
     marginTop: 4,
     marginBottom: 0,
   },
@@ -100,21 +101,21 @@ const styles = StyleSheet.create({
   type: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: C.text,
   },
   result: {
     fontSize: 13,
-    color: '#6b7280',
+    color: C.textMuted,
     marginTop: 2,
   },
   date: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: C.textLight,
     marginTop: 2,
   },
   notes: {
     fontSize: 13,
-    color: '#4b5563',
+    color: C.textMuted,
     marginTop: 4,
     fontStyle: 'italic',
   },
