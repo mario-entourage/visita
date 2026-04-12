@@ -7,7 +7,7 @@ export const C = {
   bg: '#f0ebe2',
   card: '#ffffff',
   text: '#111827',
-  textMuted: '#6b7280',
+  textMuted: '#5a6470',
   textLight: '#9ca3af',
   red: '#ef4444',
   redLight: '#fee2e2',
