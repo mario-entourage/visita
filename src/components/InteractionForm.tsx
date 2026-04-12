@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
   hintBox: {
     marginHorizontal: 16,
     marginTop: 16,
-    backgroundColor: '#f0fafa',
+    backgroundColor: C.tealBg,
     borderRadius: 10,
     borderLeftWidth: 3,
     borderLeftColor: C.teal,
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
   },
   hintBody: {
     fontSize: 13,
-    color: '#374151',
+    color: C.text,
     lineHeight: 18,
     flex: 1,
   },
@@ -806,7 +806,7 @@ const styles = StyleSheet.create({
   },
   typeChipSelected: {
     borderColor: C.teal,
-    backgroundColor: '#f0fafa',
+    backgroundColor: C.tealBg,
   },
   typeChipText: {
     fontSize: 13,

@@ -4,6 +4,7 @@ export const C = {
   tealDark: '#0d6e6e',
   teal: '#0d6e6e',
   tealLight: '#14b8a6',
+  tealBg: '#f0fafa',
   bg: '#f0ebe2',
   card: '#ffffff',
   text: '#111827',
