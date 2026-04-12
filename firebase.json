@@ -11,6 +11,14 @@
     ],
     "rewrites": [
       {
+        "source": "/guia",
+        "destination": "/guide/index.html"
+      },
+      {
+        "source": "/guia/",
+        "destination": "/guide/index.html"
+      },
+      {
         "source": "/guide",
         "destination": "/guide/index.html"
       },

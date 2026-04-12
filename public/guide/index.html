@@ -180,6 +180,17 @@
   }
   .card strong { color: var(--teal-dark); }
 
+  /* ── Tip / info box ─────────────────── */
+  .tip-box {
+    background: #f0fdf4;
+    border-left: 3px solid var(--green);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: #166534;
+  }
+
   /* ── ASCII mockup ───────────────────── */
   pre.mockup {
     background: #1e293b;
@@ -368,6 +379,11 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
   </div>
 
   <div class="card">
+    <h3>Navegacao</h3>
+    <p>A tela inicial (Hub) mostra os botoes principais do seu perfil. Cada perfil ve botoes diferentes. Toque em qualquer botao para acessar a funcionalidade.</p>
+  </div>
+
+  <div class="card">
     <h3>Card do Medico</h3>
 <pre class="mockup">+--------------------------------------+
 | Dr. Carlos Mendes              [4/5] |
@@ -378,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | Ultima visita: 2 dias atras         |
 +--------------------------------------+</pre>
     <ul>
-      <li><strong>Badge de propensidade</strong> &mdash; pontuacao de 1 a 5</li>
+      <li><strong>Badge de propensidade</strong> &mdash; pontuacao de 1 a 5 (Muito Baixa a Muito Alta)</li>
       <li><strong>Estagio do pipeline</strong> &mdash; badge colorido (Nao &rarr; Prescrevendo)</li>
       <li><strong>Tags</strong> &mdash; chips com abreviacoes (P.Alto, F.Op., Prior.)</li>
       <li><strong>Toques</strong> &mdash; total de interacoes registradas</li>
@@ -403,6 +419,7 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |                                  |
 | [Cancelar]   [Remover Flag]     |
 +----------------------------------+</pre>
+    <p>Isso cria um registro de auditoria visivel para o gerente.</p>
   </div>
 </div>
 
@@ -439,55 +456,98 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 +----------------------------------+</pre>
     <table>
       <tr><th>Botao</th><th>O que faz</th></tr>
-      <tr><td><strong>ENVIAR VISITA</strong></td><td>Registrar interacao</td></tr>
-      <tr><td><strong>MEDICOS</strong></td><td>Agendados e sinalizados</td></tr>
-      <tr><td><strong>ATIVIDADE</strong></td><td>Historico de visitas</td></tr>
-      <tr><td><strong>DESPESAS</strong></td><td>Comprovantes de reembolso</td></tr>
+      <tr><td><strong>ENVIAR VISITA</strong></td><td>Registrar uma nova interacao com um medico</td></tr>
+      <tr><td><strong>MEDICOS</strong></td><td>Ver medicos agendados e sinalizados</td></tr>
+      <tr><td><strong>ATIVIDADE</strong></td><td>Consultar historico de visitas</td></tr>
+      <tr><td><strong>DESPESAS</strong></td><td>Enviar comprovantes para reembolso</td></tr>
     </table>
   </div>
 
   <div class="card">
-    <h3>Registrar Interacao</h3>
+    <h3>Registrar uma Interacao</h3>
 <pre class="mockup">+----------------------------------+
 | &lt; Nova Interacao                 |
 +----------------------------------+
+| +------------------------------+ |
+| | [chat] Pontos de conversa    | |
+| |  visita 09/04/2026           | |
+| | . Ja demonstrou interesse... | |
+| | . Na ultima visita voce...   | |
+| +------------------------------+ |
 |                                  |
-| Tipo de Interacao                |
-| (Visita) (Evento) (Congr) (Dig) |
+| ANTES DA VISITA                  |
+| +------------------------------+ |
+| | O que voce quer abordar...   | |
+| +------------------------------+ |
 |                                  |
-| Resultado                        |
-| [1] [2] [3] [4] [5]             |
-| verm lar amar verd teal          |
+| RESULTADO                        |
+| [Nao] [Prov.Nao] [Aberto]       |
+| [Vai Prescr.] [Prescrevendo]    |
 |                                  |
-| + Mais detalhes                  |
+| APOS A VISITA                    |
+| +------------------------------+ |
+| | Como foi? O que aconteceu... | |
+| +------------------------------+ |
+|                                  |
+| +------------------------------+ |
+| |     Registrar Visita         | |
+| +------------------------------+ |
+|                                  |
+| v Mais detalhes                  |
 | ................................ |
-| . Amostras entregues   [toggle]. |
-| . Falou pessoalmente   [toggle]. |
-| . Follow-up agendado   [toggle]. |
+| . DATA DA VISITA               . |
+| . [09/04/2026]  [v]           . |
+| . Padrao: hoje. Toque para    . |
+| . retroagir a data.           . |
+| .                              . |
+| . TIPO DA VISITA               . |
+| . (V.Campo)(Evento)(Congr)(Dig). |
+| .                              . |
+| . DURANTE A VISITA             . |
+| . Falou com o medico?  [toggle]. |
+| . Deixou amostras?     [toggle]. |
+| . Marcou retorno?      [toggle]. |
+| .                              . |
+| . PRESCRICAO DE CANNABIS       . |
+| . Medico prescreve?    [toggle]. |
+| .  (se sim: produtos, tipo de  . |
+| .   receita, motivos)          . |
 | ................................ |
-|                                  |
-| Anotacoes                        |
-| +------------------------------+ |
-| |                              | |
-| +------------------------------+ |
-|                                  |
-| +------------------------------+ |
-| |    Registrar Interacao       | |
-| +------------------------------+ |
 +----------------------------------+</pre>
     <ol>
-      <li>Toque em <strong>ENVIAR VISITA</strong> ou abra o medico</li>
-      <li>Selecione o tipo: Visita de Campo, Evento Clinico, Congresso ou Digital</li>
-      <li>Escolha o resultado:
-        <span class="c-red">1-Nao</span> |
-        <span class="c-org">2-Prov.Nao</span> |
-        <span class="c-yel">3-Aberto</span> |
-        <span class="c-grn">4-Vai Prescr.</span> |
-        <span class="c-tea">5-Prescrevendo</span>
+      <li>Toque em <strong>ENVIAR VISITA</strong> ou abra o medico e toque em <strong>Registrar Interacao</strong></li>
+      <li>Veja o <strong>quadro de pontos de conversa</strong> (aparece automaticamente com base na ultima visita ou no perfil do medico)</li>
+      <li>Escreva suas notas de <strong>antes da visita</strong> &mdash; o que quer abordar</li>
+      <li>Escolha o <strong>resultado</strong> (1 a 5):
+        <ul>
+          <li><span class="c-red"><strong>1</strong> &mdash; Nao (vermelho)</span></li>
+          <li><span class="c-org"><strong>2</strong> &mdash; Provavelmente Nao (laranja)</span></li>
+          <li><span class="c-yel"><strong>3</strong> &mdash; Aberto (amarelo)</span></li>
+          <li><span class="c-grn"><strong>4</strong> &mdash; Vai Prescrever (verde)</span></li>
+          <li><span class="c-tea"><strong>5</strong> &mdash; Prescrevendo (teal)</span></li>
+        </ul>
       </li>
-      <li>Marque detalhes opcionais e adicione anotacoes</li>
-      <li>Toque em <strong>Registrar Interacao</strong></li>
+      <li>Escreva suas notas de <strong>apos a visita</strong> &mdash; como foi, o que aconteceu</li>
+      <li>Toque em <strong>Registrar Visita</strong></li>
+      <li><strong>Opcional:</strong> abra <strong>Mais detalhes</strong> para preencher:
+        <ul>
+          <li><strong>Data da visita</strong> &mdash; padrao: hoje. Para retroagir (ex: visita de segunda registrada na quarta), toque e selecione a data correta. Datas futuras nao sao permitidas.</li>
+          <li><strong>Tipo da visita</strong> &mdash; Visita de Campo, Evento Clinico, Congresso ou Digital</li>
+          <li><strong>Toggles</strong> &mdash; falou pessoalmente, deixou amostras, marcou retorno</li>
+          <li><strong>Prescricao de cannabis</strong> &mdash; se o medico prescreve, registre produtos, tipo de receita (RDC 660 / Farmacia) e motivos</li>
+        </ul>
+      </li>
     </ol>
+    <p>A localizacao GPS e capturada automaticamente (se permitido).</p>
+    <div class="tip-box">
+      <strong>Dica:</strong> O botao "Registrar Visita" fica acima de "Mais detalhes" de proposito. Para visitas do dia, basta preencher resultado e notas, e submeter. Os detalhes opcionais ficam abaixo para nao atrapalhar o fluxo rapido.
+    </div>
+    <p style="margin-top:12px"><strong>Visitas retroativas no historico:</strong></p>
+    <p>Quando a data da visita e diferente da data de registro (mais de 5 minutos de diferenca), o historico mostra as duas datas:</p>
+<pre class="mockup">o  Visita de Campo
+|  Resultado: 4 - Vai Prescrever
+|  Visita: 07/04/2026  ·  Registrado: 09/04/2026</pre>
+    <p>Quando a visita foi registrada no mesmo dia, aparece apenas uma data (como sempre foi).</p>
   </div>
 
   <div class="card">
@@ -537,8 +597,12 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | Celular: (11) 99999-0000        |
 | Email: carlos@email.com         |
 +----------------------------------+
-| [    Registrar Interacao       ] |
-| [  Medico Nao Localizado       ] |
+| +------------------------------+ |
+| |    Registrar Interacao       | |
+| +------------------------------+ |
+| +------------------------------+ |
+| |  Medico Nao Localizado       | |
+| +------------------------------+ |
 +----------------------------------+
 | Historico de Interacoes          |
 | o  Visita de Campo              |
@@ -573,7 +637,9 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 +----------------------------------+
 |                                  |
 | +------------------------------+ |
+| |                              | |
 | |    [foto do comprovante]     | |
+| |                              | |
 | +------------------------------+ |
 | [Camera]          [Galeria]      |
 |                                  |
@@ -591,12 +657,15 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | |                              | |
 | +------------------------------+ |
 |                                  |
-| [      Enviar Despesa          ] |
+| +------------------------------+ |
+| |      Enviar Despesa          | |
+| +------------------------------+ |
 +----------------------------------+</pre>
     <ol>
       <li>Toque em <strong>DESPESAS</strong> no Hub &rarr; <strong>+</strong></li>
-      <li>Tire uma foto ou selecione da galeria</li>
-      <li>Informe valor em R$ e escolha a categoria</li>
+      <li>Tire uma foto do comprovante (camera) ou selecione da galeria</li>
+      <li>Informe o valor em R$ e escolha a categoria</li>
+      <li>Adicione observacoes se necessario</li>
       <li>Toque em <strong>Enviar Despesa</strong></li>
     </ol>
   </div>
@@ -617,6 +686,13 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |                                  |
 | [Cancelar]  [Enviar Relatorio]  |
 +----------------------------------+</pre>
+    <ol>
+      <li>Abra a ficha do medico</li>
+      <li>Toque em <strong>Medico Nao Localizado</strong></li>
+      <li>Selecione o motivo</li>
+      <li>Toque em <strong>Enviar Relatorio</strong></li>
+    </ol>
+    <p>O gerente sera notificado para atualizar o cadastro.</p>
   </div>
 
   <div class="card">
@@ -624,20 +700,37 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 <pre class="mockup">+----------------------------------+
 | Adicionar Medico                 |
 +----------------------------------+
-| Nome *        [Carlos          ] |
-| Sobrenome *   [Mendes          ] |
-| Estado *      [SP              ] |
-| Especialidade [Cardiologia     ] |
+| Nome *                           |
+| +------------------------------+ |
+| | Carlos                       | |
+| +------------------------------+ |
+| Sobrenome *                      |
+| +------------------------------+ |
+| | Mendes                       | |
+| +------------------------------+ |
+| Estado *                         |
+| +------------------------------+ |
+| | SP                           | |
+| +------------------------------+ |
+| Especialidade                    |
+| +------------------------------+ |
+| | Cardiologia                  | |
+| +------------------------------+ |
 |                                  |
 | [Cancelar]    [Adicionar]       |
 +----------------------------------+</pre>
+    <ol>
+      <li>Na tela de Medicos, toque no botao <strong>+</strong></li>
+      <li>Preencha nome, sobrenome, estado e especialidade</li>
+      <li>Toque em <strong>Adicionar</strong></li>
+    </ol>
   </div>
 
   <div class="card">
     <h3>Dicas</h3>
     <ul class="tip-list">
-      <li>Registre a visita assim que sair do consultorio</li>
-      <li>Use a sinalizacao para marcar medicos que precisam de acompanhamento</li>
+      <li>Registre a visita assim que sair do consultorio &mdash; quanto mais rapido, mais preciso</li>
+      <li>Use a sinalizacao (flag) para marcar medicos que precisam de acompanhamento especial</li>
       <li>Confira os medicos sinalizados antes de planejar seu dia</li>
     </ul>
   </div>
@@ -670,24 +763,34 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |  +----------------------------+  |
 |                                  |
 +----------------------------------+</pre>
+    <table>
+      <tr><th>Botao</th><th>O que faz</th></tr>
+      <tr><td><strong>EQUIPE</strong></td><td>Ver desempenho dos representantes</td></tr>
+      <tr><td><strong>AGENDA</strong></td><td>Consultar e gerenciar agendas dos reps</td></tr>
+      <tr><td><strong>MEDICOS</strong></td><td>Buscar medicos e gerenciar atribuicoes</td></tr>
+    </table>
   </div>
 
   <div class="card">
-    <h3>Equipe</h3>
+    <h3>Acompanhar a Equipe</h3>
 <pre class="mockup">+----------------------------------+
 | &lt; Equipe                         |
 +----------------------------------+
+|                                  |
 | REPRESENTANTES                   |
 | +------------------------------+ |
 | | [L] Lamine                 > | |
 | |     Minas Gerais             | |
 | +------------------------------+ |
+| +------------------------------+ |
 | | [E] Erling                 > | |
 | |     Sao Paulo                | |
+| +------------------------------+ |
 | +------------------------------+ |
 | | [K] Kylian                 > | |
 | |     Rio de Janeiro           | |
 | +------------------------------+ |
+|                                  |
 +----------------------------------+</pre>
 <pre class="mockup">+----------------------------------+
 | &lt; Kylian                         |
@@ -706,10 +809,20 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |    Resultado: 3 - Aberto       |
 |    12/03/2026 10:00            |
 +----------------------------------+</pre>
+    <ol>
+      <li>Toque em <strong>EQUIPE</strong></li>
+      <li>Veja a lista de representantes com nome e regiao</li>
+      <li>Toque em um representante para ver:
+        <ul>
+          <li>Total de interacoes, amostras entregues e follow-ups</li>
+          <li>Historico completo de interacoes</li>
+        </ul>
+      </li>
+    </ol>
   </div>
 
   <div class="card">
-    <h3>Agendas</h3>
+    <h3>Gerenciar Agendas</h3>
 <pre class="mockup">+----------------------------------+
 | &lt; Agendas                        |
 +----------------------------------+
@@ -723,6 +836,12 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | | terca 13h - Clin. Bem-Estar>| |
 | +------------------------------+ |
 +----------------------------------+</pre>
+    <ol>
+      <li>Toque em <strong>AGENDA</strong></li>
+      <li>Selecione o representante pelo chip no topo</li>
+      <li>Veja as visitas agendadas</li>
+      <li>Para agendar uma reuniao: abra o medico &rarr; toque em <strong>Agendar Reuniao</strong></li>
+    </ol>
   </div>
 
   <div class="card">
@@ -730,6 +849,7 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 <pre class="mockup">+----------------------------------+
 | &lt; Dr. Carlos Mendes              |
 +----------------------------------+
+| ...                              |
 | Atribuir Representante    [v]    |
 | +------------------------------+ |
 | |  Lamine - Minas Gerais      | |
@@ -737,12 +857,20 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | |  Kylian - Rio de Janeiro     | |
 | +------------------------------+ |
 |                                  |
-| [     Agendar Reuniao          ] |
+| +------------------------------+ |
+| |     Agendar Reuniao          | |
+| +------------------------------+ |
 +----------------------------------+</pre>
+    <ol>
+      <li>Abra a ficha de qualquer medico</li>
+      <li>Use o dropdown <strong>Atribuir Representante</strong></li>
+      <li>Selecione o rep desejado</li>
+    </ol>
   </div>
 
   <div class="card">
     <h3>Tags de Medicos</h3>
+    <p>Tags sao rotulos que ajudam a classificar medicos. Apenas Gerentes e Admins podem edita-las.</p>
 <pre class="mockup">+----------------------------------+
 | [tags] Tags do Medico            |
 |                                  |
@@ -766,6 +894,7 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
       <tr><td>Formador de Opiniao</td><td>F.Op.</td><td>Influenciador</td></tr>
       <tr><td>Risco de Inatividade</td><td>Risco</td><td>Risco de parar de prescrever</td></tr>
     </table>
+    <p>Para editar: abra a ficha do medico &rarr; toque em <strong>Tags</strong> &rarr; marque/desmarque &rarr; <strong>Salvar Tags</strong>.</p>
   </div>
 
   <div class="card">
@@ -774,20 +903,22 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
       <tr><th>Estagio</th><th>Cod.</th><th>Significado</th></tr>
       <tr><td class="c-red">Nao</td><td>1</td><td>Medico recusou</td></tr>
       <tr><td class="c-org">Provavelmente Nao</td><td>2</td><td>Pouca abertura</td></tr>
-      <tr><td class="c-yel">Aberto</td><td>3</td><td>Neutro</td></tr>
+      <tr><td class="c-yel">Aberto</td><td>3</td><td>Neutro, sem decisao</td></tr>
       <tr><td class="c-grn">Vai Prescrever</td><td>4</td><td>Sinal positivo</td></tr>
-      <tr><td class="c-tea">Prescrevendo</td><td>5</td><td>Ja prescrevendo</td></tr>
+      <tr><td class="c-tea">Prescrevendo</td><td>5</td><td>Ja esta prescrevendo</td></tr>
     </table>
+    <p>Cada medico exibe seu estagio como um badge colorido no card e na ficha.</p>
   </div>
 
   <div class="card">
     <h3>Monitorar Flags</h3>
-    <p>Quando um rep remove uma sinalizacao, o sistema registra:</p>
+    <p>Quando um representante remove uma sinalizacao, o sistema registra:</p>
     <ul>
       <li>Quem removeu</li>
       <li>Quando removeu</li>
       <li>Por que removeu (nota obrigatoria)</li>
     </ul>
+    <p>Isso permite verificar se flags estao sendo removidos por boas razoes.</p>
   </div>
 </div>
 
@@ -818,6 +949,12 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |  +----------------------------+  |
 |                                  |
 +----------------------------------+</pre>
+    <table>
+      <tr><th>Botao</th><th>O que faz</th></tr>
+      <tr><td><strong>RELATORIOS</strong></td><td>Painel analitico com metricas e distribuicao</td></tr>
+      <tr><td><strong>MEDICOS</strong></td><td>Buscar e filtrar medicos</td></tr>
+      <tr><td><strong>ATIVIDADE</strong></td><td>Historico geral de visitas</td></tr>
+    </table>
   </div>
 
   <div class="card">
@@ -847,25 +984,27 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | | Lamine                  127  | |
 | | 8 prescrevendo        visits | |
 | +------------------------------+ |
+| +------------------------------+ |
 | | Erling                   98  | |
 | | 5 prescrevendo        visits | |
+| +------------------------------+ |
 | +------------------------------+ |
 | | Kylian                   74  | |
 | | 3 prescrevendo        visits | |
 | +------------------------------+ |
 |                                  |
 +----------------------------------+</pre>
-    <p><strong>KPIs:</strong> Total de medicos, interacoes, e medicos prescrevendo.</p>
-    <p><strong>Pipeline:</strong> Distribuicao por estagio com barras proporcionais.</p>
-    <p><strong>Visitas/Rep:</strong> Ordenado por volume, com contagem de prescricoes.</p>
+    <p><strong>1. KPIs no topo:</strong> Total de medicos ativos, total de interacoes, medicos prescrevendo (resultado = 5).</p>
+    <p><strong>2. Pipeline de Medicos:</strong> Distribuicao visual por estagio com barras proporcionais. Inclui "Sem resultado" para medicos sem interacao.</p>
+    <p><strong>3. Visitas por Representante:</strong> Lista ordenada por volume. Cada rep mostra: nome, total de visitas, quantos medicos estao prescrevendo.</p>
   </div>
 
   <div class="card">
     <h3>Como usar os dados</h3>
     <ul class="tip-list">
-      <li><strong>Comparar reps:</strong> Identifique melhores taxas de conversao</li>
-      <li><strong>Analisar pipeline:</strong> Muitos em "Nao"/"Aberto" = necessidade de treinamento</li>
-      <li><strong>Sem resultado:</strong> Muitos toques sem resultado = abordagem diferente</li>
+      <li><strong>Comparar reps:</strong> Identifique quais reps tem mais visitas e melhores taxas de conversao</li>
+      <li><strong>Analisar pipeline:</strong> Muitos em "Nao"/"Aberto" pode indicar necessidade de treinamento</li>
+      <li><strong>Sem resultado:</strong> Medicos com muitos toques sem resultado recente podem precisar de abordagem diferente</li>
     </ul>
   </div>
 </div>
@@ -905,11 +1044,34 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |          (Representante)         |
 |  [x Parar simulacao]            |
 +----------------------------------+</pre>
+    <table>
+      <tr><th>Botao</th><th>O que faz</th></tr>
+      <tr><td><strong>EQUIPE</strong></td><td>Todas as funcoes do Gerente</td></tr>
+      <tr><td><strong>AGENDA</strong></td><td>Todas as funcoes do Gerente</td></tr>
+      <tr><td><strong>MEDICOS</strong></td><td>Busca completa + gestao</td></tr>
+      <tr><td><strong>ATIVIDADE</strong></td><td>Historico geral</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Simulacao de Perfil</h3>
+    <p>O admin pode simular a experiencia de qualquer perfil:</p>
     <ol>
-      <li>Toque no chip do perfil desejado em <strong>Visualizar como:</strong></li>
-      <li>A tela muda para mostrar o que aquele perfil ve</li>
-      <li>Para voltar: <strong>Parar simulacao</strong> ou chip Admin</li>
+      <li>Na tela inicial, veja a secao <strong>Visualizar como:</strong></li>
+      <li>Toque no chip do perfil desejado (Gerente, Analista, Representante)</li>
+      <li>A tela muda para mostrar exatamente o que aquele perfil ve</li>
+      <li>Para voltar: toque em <strong>Parar simulacao</strong> ou selecione o chip Admin</li>
     </ol>
+    <p>Util para: verificar permissoes, testar novas funcionalidades, e dar suporte mostrando exatamente o que o usuario ve.</p>
+  </div>
+
+  <div class="card">
+    <h3>Gestao de Acessos</h3>
+    <ul>
+      <li>Atribuicao de roles e feita via Firestore (colecao <code>roles</code>)</li>
+      <li>Super-admins sao definidos por lista fixa de emails</li>
+      <li>Admins dinamicos sao definidos pela existencia do documento em <code>roles_admin</code></li>
+    </ul>
   </div>
 </div>
 
@@ -927,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
       <tr><td>Sinalizar medico</td><td>x</td><td>x</td><td>x</td><td>x</td></tr>
       <tr><td>Remover flag (com nota)</td><td>x</td><td>x</td><td>x</td><td>x</td></tr>
       <tr><td>Editar tags de medicos</td><td></td><td>x</td><td></td><td>x</td></tr>
-      <tr><td>Ver equipe/agenda dos reps</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>Ver equipe e agenda dos reps</td><td></td><td>x</td><td></td><td>x</td></tr>
       <tr><td>Atribuir rep a medico</td><td></td><td>x</td><td></td><td>x</td></tr>
       <tr><td>Agendar reuniao</td><td></td><td>x</td><td></td><td>x</td></tr>
       <tr><td>Painel analitico</td><td></td><td></td><td>x</td><td>x</td></tr>
@@ -949,10 +1111,11 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
       <tr><td><strong>Toque</strong></td><td>Interacao registrada entre rep e medico</td></tr>
       <tr><td><strong>Propensidade</strong></td><td>Pontuacao 1-5 de probabilidade de prescricao</td></tr>
       <tr><td><strong>Pipeline</strong></td><td>Estagio atual baseado no ultimo resultado</td></tr>
-      <tr><td><strong>Flag</strong></td><td>Marcacao para acompanhamento especial</td></tr>
+      <tr><td><strong>Flag / Sinalizacao</strong></td><td>Marcacao de medico para acompanhamento especial</td></tr>
       <tr><td><strong>Tag</strong></td><td>Rotulo gerencial (Gerente/Admin)</td></tr>
       <tr><td><strong>Resultado</strong></td><td>Codigo 1-5 registrado apos cada interacao</td></tr>
       <tr><td><strong>Despesa</strong></td><td>Comprovante de gasto para reembolso</td></tr>
+      <tr><td><strong>Data da Visita</strong></td><td>Quando a visita aconteceu (pode ser retroativa); diferente de "Registrado em" que e quando o rep abriu o app</td></tr>
     </table>
   </div>
 </div>
@@ -987,10 +1150,16 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |                                  |
 +----------------------------------+</pre>
     <ol>
-      <li>Open VISITAS in your browser or phone</li>
+      <li>Open VISITAS in your browser or on your phone</li>
       <li>Tap <strong>Sign in with Google</strong></li>
       <li>Use your <code>@entouragelab.com</code> account</li>
     </ol>
+    <p>Accounts outside the <code>@entouragelab.com</code> domain cannot access the app.</p>
+  </div>
+
+  <div class="card">
+    <h3>Navigation</h3>
+    <p>The home screen (Hub) shows the main buttons for your role. Each role sees different buttons. Tap any button to access the feature.</p>
   </div>
 
   <div class="card">
@@ -1004,7 +1173,7 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | Last visit: 2 days ago              |
 +--------------------------------------+</pre>
     <ul>
-      <li><strong>Propensity badge</strong> &mdash; score from 1 to 5</li>
+      <li><strong>Propensity badge</strong> &mdash; score from 1 to 5 (Very Low to Very High)</li>
       <li><strong>Pipeline stage</strong> &mdash; colored badge (No &rarr; Prescribing)</li>
       <li><strong>Tags</strong> &mdash; abbreviated chips (H.Pot, O.Lead, Prior.)</li>
       <li><strong>Touches</strong> &mdash; total logged interactions</li>
@@ -1013,7 +1182,7 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 
   <div class="card">
     <h3>Flagging</h3>
-    <p>Any user can <strong>flag</strong> a doctor with one tap. To <strong>remove</strong> the flag, a note is required:</p>
+    <p>Any user can <strong>flag</strong> a doctor with one tap. To <strong>remove</strong> the flag, a written note is required:</p>
 <pre class="mockup">+----------------------------------+
 | [flag] Remove Flag               |
 |                                  |
@@ -1029,6 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |                                  |
 | [Cancel]      [Remove Flag]     |
 +----------------------------------+</pre>
+    <p>This creates an audit trail visible to the manager.</p>
   </div>
 </div>
 
@@ -1065,10 +1235,10 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 +----------------------------------+</pre>
     <table>
       <tr><th>Button</th><th>Purpose</th></tr>
-      <tr><td><strong>LOG VISIT</strong></td><td>Record an interaction</td></tr>
-      <tr><td><strong>DOCTORS</strong></td><td>Scheduled &amp; flagged</td></tr>
-      <tr><td><strong>ACTIVITY</strong></td><td>Visit history</td></tr>
-      <tr><td><strong>EXPENSES</strong></td><td>Submit receipts</td></tr>
+      <tr><td><strong>LOG VISIT</strong></td><td>Record a new interaction with a doctor</td></tr>
+      <tr><td><strong>DOCTORS</strong></td><td>View scheduled and flagged doctors</td></tr>
+      <tr><td><strong>ACTIVITY</strong></td><td>Browse visit history</td></tr>
+      <tr><td><strong>EXPENSES</strong></td><td>Submit receipts for reimbursement</td></tr>
     </table>
   </div>
 
@@ -1077,41 +1247,86 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 <pre class="mockup">+----------------------------------+
 | &lt; New Interaction                |
 +----------------------------------+
-|                                  |
-| Interaction Type                 |
-| (Field) (Event) (Congr.) (Dig.) |
-|                                  |
-| Result                           |
-| [1] [2] [3] [4] [5]             |
-| red org  yel grn teal            |
-|                                  |
-| + More details                   |
-| ................................ |
-| . Samples delivered    [toggle]. |
-| . Spoke face to face   [toggle]. |
-| . Follow-up scheduled  [toggle]. |
-| ................................ |
-|                                  |
-| Notes                            |
 | +------------------------------+ |
-| |                              | |
+| | [chat] Talking points        | |
+| |  visit 04/09/2026            | |
+| | . Already showed interest... | |
+| | . Last visit you noted...    | |
 | +------------------------------+ |
 |                                  |
-| [     Log Interaction          ] |
+| BEFORE THE VISIT                 |
+| +------------------------------+ |
+| | What do you want to cover... | |
+| +------------------------------+ |
+|                                  |
+| RESULT                           |
+| [No] [Prob.No] [Open]           |
+| [Will Prescr.] [Prescribing]    |
+|                                  |
+| AFTER THE VISIT                  |
+| +------------------------------+ |
+| | How did it go? What happn... | |
+| +------------------------------+ |
+|                                  |
+| +------------------------------+ |
+| |      Log Visit               | |
+| +------------------------------+ |
+|                                  |
+| v More details                   |
+| ................................ |
+| . VISIT DATE                   . |
+| . [04/09/2026]  [v]           . |
+| . Default: today. Tap to set  . |
+| . an earlier date.            . |
+| .                              . |
+| . VISIT TYPE                   . |
+| . (Field)(Event)(Congr.)(Dig.). |
+| .                              . |
+| . DURING THE VISIT             . |
+| . Spoke with doctor?   [toggle]. |
+| . Left samples?        [toggle]. |
+| . Scheduled follow-up? [toggle]. |
+| .                              . |
+| . CANNABIS PRESCRIPTION        . |
+| . Doctor prescribes?   [toggle]. |
+| .  (if yes: products, rx type,. |
+| .   prescribing reasons)       . |
+| ................................ |
 +----------------------------------+</pre>
     <ol>
-      <li>Tap <strong>LOG VISIT</strong> or open a doctor</li>
-      <li>Select type: Field Visit, Clinical Event, Congress, or Digital</li>
-      <li>Choose result:
-        <span class="c-red">1-No</span> |
-        <span class="c-org">2-Prob.Not</span> |
-        <span class="c-yel">3-Open</span> |
-        <span class="c-grn">4-Will Prescr.</span> |
-        <span class="c-tea">5-Prescribing</span>
+      <li>Tap <strong>LOG VISIT</strong> or open the doctor and tap <strong>Log Interaction</strong></li>
+      <li>See the <strong>talking points box</strong> (appears automatically based on the last visit or the doctor's profile)</li>
+      <li>Write your <strong>before the visit</strong> notes &mdash; what you want to cover</li>
+      <li>Choose the <strong>result</strong> (1 to 5):
+        <ul>
+          <li><span class="c-red"><strong>1</strong> &mdash; No (red)</span></li>
+          <li><span class="c-org"><strong>2</strong> &mdash; Probably Not (orange)</span></li>
+          <li><span class="c-yel"><strong>3</strong> &mdash; Open (yellow)</span></li>
+          <li><span class="c-grn"><strong>4</strong> &mdash; Will Prescribe (green)</span></li>
+          <li><span class="c-tea"><strong>5</strong> &mdash; Prescribing (teal)</span></li>
+        </ul>
       </li>
-      <li>Toggle optional details, add notes</li>
-      <li>Tap <strong>Log Interaction</strong></li>
+      <li>Write your <strong>after the visit</strong> notes &mdash; how it went, what happened</li>
+      <li>Tap <strong>Log Visit</strong></li>
+      <li><strong>Optional:</strong> open <strong>More details</strong> to fill in:
+        <ul>
+          <li><strong>Visit date</strong> &mdash; defaults to today. Tap to set an earlier date (e.g., logging a Monday visit on Wednesday). Future dates are not allowed.</li>
+          <li><strong>Visit type</strong> &mdash; Field Visit, Clinical Event, Congress, or Digital</li>
+          <li><strong>Toggles</strong> &mdash; spoke with doctor, left samples, scheduled follow-up</li>
+          <li><strong>Cannabis prescription</strong> &mdash; if the doctor prescribes, log products, prescription type (RDC 660 / Pharmacy), and reasons</li>
+        </ul>
+      </li>
     </ol>
+    <p>GPS location is captured automatically (if permission granted).</p>
+    <div class="tip-box">
+      <strong>Tip:</strong> The "Log Visit" button is intentionally above "More details." For same-day visits, just fill in the result and notes, and submit. Optional details are below so they don't slow down the quick flow.
+    </div>
+    <p style="margin-top:12px"><strong>Backdated visits in the timeline:</strong></p>
+    <p>When a visit date differs from the log date by more than 5 minutes, the history card shows both:</p>
+<pre class="mockup">o  Field Visit
+|  Result: 4 - Will Prescribe
+|  Visit: 04/07/2026  ·  Logged: 04/09/2026</pre>
+    <p>When the visit was logged the same day, only one date is shown (as always).</p>
   </div>
 
   <div class="card">
@@ -1161,8 +1376,12 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | Mobile: (11) 99999-0000         |
 | Email: carlos@email.com         |
 +----------------------------------+
-| [     Log Interaction          ] |
-| [  Doctor Not Found            ] |
+| +------------------------------+ |
+| |     Log Interaction          | |
+| +------------------------------+ |
+| +------------------------------+ |
+| |  Doctor Not Found            | |
+| +------------------------------+ |
 +----------------------------------+
 | Interaction History              |
 | o  Field Visit                  |
@@ -1194,7 +1413,9 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 +----------------------------------+
 |                                  |
 | +------------------------------+ |
+| |                              | |
 | |     [receipt photo]          | |
+| |                              | |
 | +------------------------------+ |
 | [Camera]          [Gallery]      |
 |                                  |
@@ -1212,8 +1433,18 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | |                              | |
 | +------------------------------+ |
 |                                  |
-| [      Submit Expense          ] |
+| +------------------------------+ |
+| |      Submit Expense          | |
+| +------------------------------+ |
 +----------------------------------+</pre>
+    <ol>
+      <li>Tap <strong>EXPENSES</strong> on the Hub</li>
+      <li>Tap <strong>+</strong> or the floating button</li>
+      <li>Take a photo of the receipt (camera) or select from gallery</li>
+      <li>Enter the amount in R$ and choose the category</li>
+      <li>Add notes if needed</li>
+      <li>Tap <strong>Submit Expense</strong></li>
+    </ol>
   </div>
 
   <div class="card">
@@ -1232,6 +1463,13 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |                                  |
 | [Cancel]   [Submit Report]      |
 +----------------------------------+</pre>
+    <ol>
+      <li>Open the doctor's profile</li>
+      <li>Tap <strong>Doctor Not Found</strong></li>
+      <li>Select the reason</li>
+      <li>Tap <strong>Submit Report</strong></li>
+    </ol>
+    <p>The manager will be notified to update the record.</p>
   </div>
 
   <div class="card">
@@ -1239,20 +1477,37 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 <pre class="mockup">+----------------------------------+
 | Add Doctor                       |
 +----------------------------------+
-| First Name *  [Carlos          ] |
-| Last Name *   [Mendes          ] |
-| State *       [SP              ] |
-| Specialty     [Cardiology      ] |
+| First Name *                     |
+| +------------------------------+ |
+| | Carlos                       | |
+| +------------------------------+ |
+| Last Name *                      |
+| +------------------------------+ |
+| | Mendes                       | |
+| +------------------------------+ |
+| State *                          |
+| +------------------------------+ |
+| | SP                           | |
+| +------------------------------+ |
+| Specialty                        |
+| +------------------------------+ |
+| | Cardiology                   | |
+| +------------------------------+ |
 |                                  |
 | [Cancel]       [Add]            |
 +----------------------------------+</pre>
+    <ol>
+      <li>On the Doctors screen, tap the <strong>+</strong> button</li>
+      <li>Fill in first name, last name, state, and specialty</li>
+      <li>Tap <strong>Add</strong></li>
+    </ol>
   </div>
 
   <div class="card">
     <h3>Tips</h3>
     <ul class="tip-list">
-      <li>Log the visit as soon as you leave the office</li>
-      <li>Use flagging for doctors who need special attention</li>
+      <li>Log the visit as soon as you leave the office &mdash; the sooner, the more accurate</li>
+      <li>Use flagging to mark doctors who need special attention</li>
       <li>Check flagged doctors before planning your day</li>
     </ul>
   </div>
@@ -1285,24 +1540,34 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |  +----------------------------+  |
 |                                  |
 +----------------------------------+</pre>
+    <table>
+      <tr><th>Button</th><th>Purpose</th></tr>
+      <tr><td><strong>TEAM</strong></td><td>View rep performance</td></tr>
+      <tr><td><strong>SCHEDULES</strong></td><td>View and manage rep schedules</td></tr>
+      <tr><td><strong>DOCTORS</strong></td><td>Search doctors and manage assignments</td></tr>
+    </table>
   </div>
 
   <div class="card">
-    <h3>Team</h3>
+    <h3>Monitor the Team</h3>
 <pre class="mockup">+----------------------------------+
 | &lt; Team                           |
 +----------------------------------+
+|                                  |
 | REPRESENTATIVES                  |
 | +------------------------------+ |
 | | [L] Lamine                 > | |
 | |     Minas Gerais             | |
 | +------------------------------+ |
+| +------------------------------+ |
 | | [E] Erling                 > | |
 | |     Sao Paulo                | |
+| +------------------------------+ |
 | +------------------------------+ |
 | | [K] Kylian                 > | |
 | |     Rio de Janeiro           | |
 | +------------------------------+ |
+|                                  |
 +----------------------------------+</pre>
 <pre class="mockup">+----------------------------------+
 | &lt; Kylian                         |
@@ -1321,10 +1586,20 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |    Result: 3 - Open            |
 |    Mar 12 2026 10:00           |
 +----------------------------------+</pre>
+    <ol>
+      <li>Tap <strong>TEAM</strong></li>
+      <li>View the list of reps with name and region</li>
+      <li>Tap a rep to see:
+        <ul>
+          <li>Total interactions, samples delivered, and follow-ups</li>
+          <li>Full interaction history</li>
+        </ul>
+      </li>
+    </ol>
   </div>
 
   <div class="card">
-    <h3>Schedules</h3>
+    <h3>Manage Schedules</h3>
 <pre class="mockup">+----------------------------------+
 | &lt; Schedules                      |
 +----------------------------------+
@@ -1338,13 +1613,20 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | | Tue 1pm - Clinica Bem-Estar>| |
 | +------------------------------+ |
 +----------------------------------+</pre>
+    <ol>
+      <li>Tap <strong>SCHEDULES</strong></li>
+      <li>Select a rep using the chips at the top</li>
+      <li>View their scheduled visits</li>
+      <li>To schedule a meeting: open the doctor &rarr; tap <strong>Schedule Meeting</strong></li>
+    </ol>
   </div>
 
   <div class="card">
-    <h3>Assign a Rep</h3>
+    <h3>Assign a Rep to a Doctor</h3>
 <pre class="mockup">+----------------------------------+
 | &lt; Dr. Carlos Mendes              |
 +----------------------------------+
+| ...                              |
 | Assign Representative     [v]    |
 | +------------------------------+ |
 | |  Lamine - Minas Gerais      | |
@@ -1352,12 +1634,20 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | |  Kylian - Rio de Janeiro     | |
 | +------------------------------+ |
 |                                  |
-| [     Schedule Meeting         ] |
+| +------------------------------+ |
+| |     Schedule Meeting         | |
+| +------------------------------+ |
 +----------------------------------+</pre>
+    <ol>
+      <li>Open any doctor's profile</li>
+      <li>Use the <strong>Assign Representative</strong> dropdown</li>
+      <li>Select the desired rep</li>
+    </ol>
   </div>
 
   <div class="card">
     <h3>Doctor Tags</h3>
+    <p>Tags are labels that help classify doctors. Only Managers and Admins can edit them.</p>
 <pre class="mockup">+----------------------------------+
 | [tags] Doctor Tags               |
 |                                  |
@@ -1375,12 +1665,13 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
     <table>
       <tr><th>Tag</th><th>Abbrev.</th><th>Usage</th></tr>
       <tr><td>Potencial Alto</td><td>H.Pot</td><td>High prescription potential</td></tr>
-      <tr><td>Nova Clinica</td><td>N.Cli</td><td>Newly opened clinic</td></tr>
+      <tr><td>Nova Clinica</td><td>N.Cli</td><td>Doctor at a newly opened clinic</td></tr>
       <tr><td>Visita Conjunta</td><td>J.Vis</td><td>Needs a joint visit</td></tr>
-      <tr><td>Prioritario</td><td>Prior.</td><td>Top priority</td></tr>
+      <tr><td>Prioritario</td><td>Prior.</td><td>Top priority for visits</td></tr>
       <tr><td>Formador de Opiniao</td><td>O.Lead</td><td>Influences peers</td></tr>
-      <tr><td>Risco de Inatividade</td><td>Risk</td><td>At risk of stopping</td></tr>
+      <tr><td>Risco de Inatividade</td><td>Risk</td><td>At risk of stopping prescription</td></tr>
     </table>
+    <p>To edit: open the doctor's profile &rarr; tap <strong>Tags</strong> &rarr; check/uncheck &rarr; <strong>Save Tags</strong>.</p>
   </div>
 
   <div class="card">
@@ -1389,10 +1680,11 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
       <tr><th>Stage</th><th>Code</th><th>Meaning</th></tr>
       <tr><td class="c-red">No</td><td>1</td><td>Doctor refused</td></tr>
       <tr><td class="c-org">Probably Not</td><td>2</td><td>Little openness</td></tr>
-      <tr><td class="c-yel">Open</td><td>3</td><td>Neutral</td></tr>
+      <tr><td class="c-yel">Open</td><td>3</td><td>Neutral, undecided</td></tr>
       <tr><td class="c-grn">Will Prescribe</td><td>4</td><td>Positive signal</td></tr>
       <tr><td class="c-tea">Prescribing</td><td>5</td><td>Already prescribing</td></tr>
     </table>
+    <p>Each doctor displays their stage as a colored badge on the card and profile.</p>
   </div>
 
   <div class="card">
@@ -1401,8 +1693,9 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
     <ul>
       <li>Who removed it</li>
       <li>When it was removed</li>
-      <li>Why (required note)</li>
+      <li>Why it was removed (required note)</li>
     </ul>
+    <p>This lets you verify that flags are being removed for good reasons.</p>
   </div>
 </div>
 
@@ -1433,6 +1726,12 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |  +----------------------------+  |
 |                                  |
 +----------------------------------+</pre>
+    <table>
+      <tr><th>Button</th><th>Purpose</th></tr>
+      <tr><td><strong>REPORTS</strong></td><td>Analytics dashboard with metrics and distribution</td></tr>
+      <tr><td><strong>DOCTORS</strong></td><td>Search and filter doctors</td></tr>
+      <tr><td><strong>ACTIVITY</strong></td><td>Full visit history</td></tr>
+    </table>
   </div>
 
   <div class="card">
@@ -1462,25 +1761,27 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 | | Lamine                  127  | |
 | | 8 prescribing         visits | |
 | +------------------------------+ |
+| +------------------------------+ |
 | | Erling                   98  | |
 | | 5 prescribing         visits | |
+| +------------------------------+ |
 | +------------------------------+ |
 | | Kylian                   74  | |
 | | 3 prescribing         visits | |
 | +------------------------------+ |
 |                                  |
 +----------------------------------+</pre>
-    <p><strong>KPIs:</strong> Total doctors, interactions, and prescribing doctors.</p>
-    <p><strong>Pipeline:</strong> Distribution by stage with proportional bars.</p>
-    <p><strong>Visits/Rep:</strong> Sorted by volume, with prescribing count.</p>
+    <p><strong>1. Top-line KPIs:</strong> Total active doctors, total logged interactions, doctors prescribing (result = 5).</p>
+    <p><strong>2. Doctor Pipeline:</strong> Visual distribution by stage with proportional bars. Includes "No result" for doctors without any interaction.</p>
+    <p><strong>3. Visits per Rep:</strong> All reps sorted by visit volume. Each rep shows: name, total visits, how many doctors are prescribing.</p>
   </div>
 
   <div class="card">
     <h3>How to Use the Data</h3>
     <ul class="tip-list">
-      <li><strong>Compare reps:</strong> Identify best conversion rates</li>
-      <li><strong>Analyze pipeline:</strong> Many at "No"/"Open" = coaching needed</li>
-      <li><strong>No results:</strong> Many touches without result = different approach needed</li>
+      <li><strong>Compare reps:</strong> Identify which reps have the most visits and best conversion rates</li>
+      <li><strong>Analyze the pipeline:</strong> If many doctors are stuck at "No" or "Open," it may indicate a need for coaching</li>
+      <li><strong>Doctors without results:</strong> Doctors with many touches but no recent result may need a different approach</li>
     </ul>
   </div>
 </div>
@@ -1520,11 +1821,34 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
 |          (Rep)                   |
 |  [x Stop impersonation]         |
 +----------------------------------+</pre>
+    <table>
+      <tr><th>Button</th><th>Purpose</th></tr>
+      <tr><td><strong>TEAM</strong></td><td>All Manager functions</td></tr>
+      <tr><td><strong>SCHEDULES</strong></td><td>All Manager functions</td></tr>
+      <tr><td><strong>DOCTORS</strong></td><td>Full search + management</td></tr>
+      <tr><td><strong>ACTIVITY</strong></td><td>Full history</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Role Impersonation</h3>
+    <p>Admins can simulate the experience of any role:</p>
     <ol>
-      <li>Tap the role chip under <strong>View as:</strong></li>
-      <li>The screen changes to show that role's view</li>
-      <li>To return: <strong>Stop impersonation</strong> or tap Admin</li>
+      <li>On the home screen, find the <strong>View as:</strong> section</li>
+      <li>Tap the chip for the desired role (Manager, Analyst, Rep)</li>
+      <li>The screen changes to show exactly what that role sees</li>
+      <li>To return: tap <strong>Stop impersonation</strong> or select the Admin chip</li>
     </ol>
+    <p>Useful for: verifying each role only sees what it should, testing new features from each user's perspective, and supporting users by seeing exactly what they see.</p>
+  </div>
+
+  <div class="card">
+    <h3>Access Management</h3>
+    <ul>
+      <li>Role assignments are made via Firestore (<code>roles</code> collection)</li>
+      <li>Super-admins are defined by a fixed list of emails</li>
+      <li>Dynamic admins are defined by the existence of a document in <code>roles_admin</code></li>
+    </ul>
   </div>
 </div>
 
@@ -1542,12 +1866,12 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
       <tr><td>Flag a doctor</td><td>x</td><td>x</td><td>x</td><td>x</td></tr>
       <tr><td>Remove flag (with note)</td><td>x</td><td>x</td><td>x</td><td>x</td></tr>
       <tr><td>Edit doctor tags</td><td></td><td>x</td><td></td><td>x</td></tr>
-      <tr><td>View team/rep schedules</td><td></td><td>x</td><td></td><td>x</td></tr>
+      <tr><td>View team and rep schedules</td><td></td><td>x</td><td></td><td>x</td></tr>
       <tr><td>Assign rep to doctor</td><td></td><td>x</td><td></td><td>x</td></tr>
       <tr><td>Schedule meeting</td><td></td><td>x</td><td></td><td>x</td></tr>
       <tr><td>Analytics dashboard</td><td></td><td></td><td>x</td><td>x</td></tr>
       <tr><td>View all expenses</td><td></td><td>x</td><td></td><td>x</td></tr>
-      <tr><td>Impersonate roles</td><td></td><td></td><td></td><td>x</td></tr>
+      <tr><td>Impersonate other roles</td><td></td><td></td><td></td><td>x</td></tr>
       <tr><td>Manage roles</td><td></td><td></td><td></td><td>x</td></tr>
     </table>
   </div>
@@ -1562,12 +1886,13 @@ document.addEventListener('DOMContentLoaded', () => setLang('pt'));
     <table>
       <tr><th style="text-align:left">Term</th><th style="text-align:left">Meaning</th></tr>
       <tr><td><strong>Touch</strong></td><td>A logged interaction between a rep and a doctor</td></tr>
-      <tr><td><strong>Propensity</strong></td><td>Score 1-5 indicating likelihood of prescribing</td></tr>
-      <tr><td><strong>Pipeline</strong></td><td>Current stage based on last interaction result</td></tr>
-      <tr><td><strong>Flag</strong></td><td>Marking a doctor for special follow-up</td></tr>
+      <tr><td><strong>Propensity</strong></td><td>Score from 1-5 indicating likelihood of prescribing</td></tr>
+      <tr><td><strong>Pipeline</strong></td><td>Doctor's current stage based on last interaction result</td></tr>
+      <tr><td><strong>Flag</strong></td><td>Marking a doctor for special follow-up attention</td></tr>
       <tr><td><strong>Tag</strong></td><td>Managerial label assigned by Manager/Admin</td></tr>
       <tr><td><strong>Result</strong></td><td>Code 1-5 logged after each interaction</td></tr>
       <tr><td><strong>Expense</strong></td><td>Receipt submitted for reimbursement</td></tr>
+      <tr><td><strong>Visit Date</strong></td><td>When the visit actually happened (can be backdated); different from "Logged" which is when the rep opened the app</td></tr>
     </table>
   </div>
 </div>
