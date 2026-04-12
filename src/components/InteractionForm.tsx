@@ -759,9 +759,11 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: C.teal,
     marginHorizontal: 16,
-    paddingVertical: 15,
+    paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
     marginTop: 24,
   },
   buttonDisabled: {
