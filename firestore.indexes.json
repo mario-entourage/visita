@@ -36,6 +36,22 @@
         { "fieldPath": "flaggedForFollowUp", "order": "ASCENDING" },
         { "fieldPath": "fullName", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "interactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "doctorId", "order": "ASCENDING" },
+        { "fieldPath": "visitDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "interactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "repId", "order": "ASCENDING" },
+        { "fieldPath": "visitDate", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

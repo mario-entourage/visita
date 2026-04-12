@@ -43,7 +43,7 @@ import type {
 import { useCalendarAuth } from '@/hooks/use-calendar-auth';
 import { SyncModal, type SyncDirection, type SyncWeek } from '@/components/SyncModal';
 import { SyncReviewList, type ReviewItem } from '@/components/SyncReviewList';
-import { formatTimestamp } from '@/lib/utils';
+import { formatTimestamp, effectiveDate, sortByEffectiveDate } from '@/lib/utils';
 import { C, RESULT_COLORS , S } from '@/theme';
 import { RESULT_LABELS, INTERACTION_TYPE_LABELS } from '@/lib/constants';
 import type { ScheduledVisit } from '@/types/scheduled-visit';
@@ -388,7 +388,7 @@ export default function ScheduleScreen() {
         <Text style={[styles.sectionHeader, { marginTop: 24 }]}>MEU HISTÓRICO</Text>
 
         {history && history.length > 0 ? (
-          history.map((item) => {
+          [...history].sort(sortByEffectiveDate).map((item) => {
             const colors = RESULT_COLORS[item.resultCode] ?? { bg: C.border, text: C.textMuted };
             return (
               <Pressable
@@ -417,7 +417,7 @@ export default function ScheduleScreen() {
                   ) : null}
                 </View>
                 <Text style={styles.historyDate}>
-                  {formatTimestamp(item.createdAt, 'dd/MM')}
+                  {formatTimestamp(effectiveDate(item), 'dd/MM')}
                 </Text>
               </Pressable>
             );

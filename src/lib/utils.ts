@@ -25,7 +25,9 @@ export function formatRelativeTime(timestamp: Timestamp | undefined): string {
 
 // ── Visit backdate helpers ────────────────────────────────────────────────────
 
-// 5 minutes — sub-second clock drift is expected; same-session reposts are not
+// 5 minutes — chosen to be larger than normal clock drift / optimistic-write delay
+// but small enough to catch genuine same-day late entries (e.g. logged 10 min after visit).
+// Not a hard business rule; used only to decide whether to show the dual-date label.
 export const LAG_THRESHOLD_MS = 5 * 60 * 1000;
 
 // The date to display and sort by: visitDate if set, createdAt otherwise.
@@ -39,4 +41,11 @@ export function effectiveDate(i: Interaction): Timestamp {
 export function hasLag(i: Interaction): boolean {
   if (!i.visitDate || !i.createdAt) return false;
   return (i.createdAt.toMillis() - i.visitDate.toMillis()) > LAG_THRESHOLD_MS;
+}
+
+// Sort comparator: newest effectiveDate first.
+// Use this everywhere interactions are sorted — Timeline, ATIVIDADE tab, etc. —
+// to ensure consistent ordering when visitDate is present.
+export function sortByEffectiveDate(a: Interaction, b: Interaction): number {
+  return effectiveDate(b).toMillis() - effectiveDate(a).toMillis();
 }

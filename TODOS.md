@@ -48,25 +48,3 @@ If `visitDate`, an approval workflow would be needed. If `createdAt`, no change 
 **Priority:** P3 (no action until compliance reporting is confirmed)
 **Depends on:** Understanding of downstream data consumers
 
-## P3 — Firestore composite index: visitDate + doctorId for future date-range queries
-
-**What:** When the analista dashboard or manager views add date-range filtering (e.g.,
-"show interactions between Jan 1 and Mar 31"), a Firestore composite index on
-`[doctorId, visitDate]` or `[repId, visitDate]` will be required. Without it,
-the first filter+sort-by-visitDate query fails at runtime with a Firestore error
-linking to the console to create the index.
-
-**Why:** Client-side sort currently avoids the need. But `effectiveDate()` is not
-stored — any server-side query using visitDate needs a composite index pre-created.
-
-**Where to start:** `firestore.indexes.json` — add composite indexes for:
-- `[doctorId asc, visitDate desc]` (doctor timeline server-side sort)
-- `[repId asc, visitDate desc]` (rep activity server-side sort)
-
-Then update `getInteractionsByDoctorQuery` to use `orderBy('visitDate', 'desc')` with
-fallback handling for old records without visitDate (requires a `visitDate >= epoch`
-where clause, or a default value migration).
-
-**Effort:** S (human: ~3h / CC: ~20min)
-**Priority:** P3 (not needed until server-side visitDate queries are added)
-**Depends on:** Analytics date-range filtering feature (not yet planned)

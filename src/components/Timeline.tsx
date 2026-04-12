@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { Interaction } from '@/types/interaction';
 import { INTERACTION_TYPE_LABELS, RESULT_LABELS } from '@/lib/constants';
-import { formatTimestamp, effectiveDate, hasLag } from '@/lib/utils';
+import { formatTimestamp, effectiveDate, hasLag, sortByEffectiveDate } from '@/lib/utils';
 
 interface TimelineProps {
   interactions: (Interaction & { id: string })[];
@@ -17,9 +17,7 @@ export function Timeline({ interactions }: TimelineProps) {
     );
   }
 
-  const sorted = [...interactions].sort(
-    (a, b) => effectiveDate(b).toMillis() - effectiveDate(a).toMillis()
-  );
+  const sorted = [...interactions].sort(sortByEffectiveDate);
 
   return (
     <View style={styles.container}>
