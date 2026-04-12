@@ -132,49 +132,74 @@ Isso cria um registro de auditoria visivel para o gerente.
 +----------------------------------+
 | < Nova Interacao                 |
 +----------------------------------+
+| +------------------------------+ |
+| | [chat] Pontos de conversa    | |
+| |  visita 09/04/2026           | |
+| | . Ja demonstrou interesse... | |
+| | . Na ultima visita voce...   | |
+| +------------------------------+ |
 |                                  |
-| Tipo de Interacao                |
-| (Visita) (Evento) (Congr) (Dig) |
+| ANTES DA VISITA                  |
+| +------------------------------+ |
+| | O que voce quer abordar...   | |
+| +------------------------------+ |
 |                                  |
-| Resultado                        |
-| [1] [2] [3] [4] [5]             |
-| verm lar amar verd teal          |
+| RESULTADO                        |
+| [Nao] [Prov.Nao] [Aberto]       |
+| [Vai Prescr.] [Prescrevendo]    |
 |                                  |
-| + Mais detalhes                  |
+| APOS A VISITA                    |
+| +------------------------------+ |
+| | Como foi? O que aconteceu... | |
+| +------------------------------+ |
+|                                  |
+| +------------------------------+ |
+| |     Registrar Visita         | |
+| +------------------------------+ |
+|                                  |
+| v Mais detalhes                  |
 | ................................ |
-| . Data da visita [09/04/2026]. . |
-| . Padrao: hoje. Toque para     . |
-| . retroagir a data.            . |
-| . Amostras entregues   [toggle]. |
-| . Falou pessoalmente   [toggle]. |
-| . Follow-up agendado   [toggle]. |
+| . DATA DA VISITA               . |
+| . [09/04/2026]  [v]           . |
+| . Padrao: hoje. Toque para    . |
+| . retroagir a data.           . |
+| .                              . |
+| . TIPO DA VISITA               . |
+| . (V.Campo)(Evento)(Congr)(Dig). |
+| .                              . |
+| . DURANTE A VISITA             . |
+| . Falou com o medico?  [toggle]. |
+| . Deixou amostras?     [toggle]. |
+| . Marcou retorno?      [toggle]. |
+| .                              . |
+| . PRESCRICAO DE CANNABIS       . |
+| . Medico prescreve?    [toggle]. |
+| .  (se sim: produtos, tipo de  . |
+| .   receita, motivos)          . |
 | ................................ |
-|                                  |
-| Anotacoes                        |
-| +------------------------------+ |
-| |                              | |
-| +------------------------------+ |
-|                                  |
-| +------------------------------+ |
-| |    Registrar Interacao       | |
-| +------------------------------+ |
 +----------------------------------+
 ```
 
 1. Toque em **ENVIAR VISITA** ou abra o medico e toque em **Registrar Interacao**
-2. Selecione o tipo: Visita de Campo, Evento Clinico, Congresso ou Digital
-3. Escolha o resultado (1 a 5):
+2. Veja o **quadro de pontos de conversa** (aparece automaticamente com base na ultima visita ou no perfil do medico)
+3. Escreva suas notas de **antes da visita** — o que quer abordar
+4. Escolha o **resultado** (1 a 5):
    - **1** — Nao (vermelho)
    - **2** — Provavelmente Nao (laranja)
    - **3** — Aberto (amarelo)
    - **4** — Vai Prescrever (verde)
    - **5** — Prescrevendo (teal)
-4. **Data da visita** — por padrao ja vem com a data de hoje. Para retroagir (ex: visita de segunda registrada na quarta), toque no campo e selecione a data correta. Datas futuras nao sao permitidas.
-5. Marque os detalhes opcionais: amostras entregues, falou pessoalmente, follow-up agendado
-6. Adicione anotacoes se necessario
-7. Toque em **Registrar Interacao**
+5. Escreva suas notas de **apos a visita** — como foi, o que aconteceu
+6. Toque em **Registrar Visita**
+7. **Opcional:** abra **Mais detalhes** para preencher:
+   - **Data da visita** — padrao: hoje. Para retroagir (ex: visita de segunda registrada na quarta), toque e selecione a data correta. Datas futuras nao sao permitidas.
+   - **Tipo da visita** — Visita de Campo, Evento Clinico, Congresso ou Digital
+   - **Toggles** — falou pessoalmente, deixou amostras, marcou retorno
+   - **Prescricao de cannabis** — se o medico prescreve, registre produtos, tipo de receita (RDC 660 / Farmacia) e motivos
 
 A localizacao GPS e capturada automaticamente (se permitido).
+
+> **Dica:** O botao "Registrar Visita" fica acima de "Mais detalhes" de proposito. Para visitas do dia, basta preencher resultado e notas, e submeter. Os detalhes opcionais ficam abaixo para nao atrapalhar o fluxo rapido.
 
 **Visitas retroativas no historico:**
 
@@ -895,49 +920,74 @@ This creates an audit trail visible to the manager.
 +----------------------------------+
 | < New Interaction                |
 +----------------------------------+
+| +------------------------------+ |
+| | [chat] Talking points        | |
+| |  visit 04/09/2026            | |
+| | . Already showed interest... | |
+| | . Last visit you noted...    | |
+| +------------------------------+ |
 |                                  |
-| Interaction Type                 |
-| (Field) (Event) (Congr.) (Dig.) |
+| BEFORE THE VISIT                 |
+| +------------------------------+ |
+| | What do you want to cover... | |
+| +------------------------------+ |
 |                                  |
-| Result                           |
-| [1] [2] [3] [4] [5]             |
-| red org  yel grn teal            |
+| RESULT                           |
+| [No] [Prob.No] [Open]           |
+| [Will Prescr.] [Prescribing]    |
 |                                  |
-| + More details                   |
+| AFTER THE VISIT                  |
+| +------------------------------+ |
+| | How did it go? What happn... | |
+| +------------------------------+ |
+|                                  |
+| +------------------------------+ |
+| |      Log Visit               | |
+| +------------------------------+ |
+|                                  |
+| v More details                   |
 | ................................ |
-| . Visit date      [04/09/2026] . |
-| . Default: today. Tap to set   . |
-| . an earlier date.             . |
-| . Samples delivered    [toggle]. |
-| . Spoke face to face   [toggle]. |
-| . Follow-up scheduled  [toggle]. |
+| . VISIT DATE                   . |
+| . [04/09/2026]  [v]           . |
+| . Default: today. Tap to set  . |
+| . an earlier date.            . |
+| .                              . |
+| . VISIT TYPE                   . |
+| . (Field)(Event)(Congr.)(Dig.). |
+| .                              . |
+| . DURING THE VISIT             . |
+| . Spoke with doctor?   [toggle]. |
+| . Left samples?        [toggle]. |
+| . Scheduled follow-up? [toggle]. |
+| .                              . |
+| . CANNABIS PRESCRIPTION        . |
+| . Doctor prescribes?   [toggle]. |
+| .  (if yes: products, rx type,. |
+| .   prescribing reasons)       . |
 | ................................ |
-|                                  |
-| Notes                            |
-| +------------------------------+ |
-| |                              | |
-| +------------------------------+ |
-|                                  |
-| +------------------------------+ |
-| |     Log Interaction          | |
-| +------------------------------+ |
 +----------------------------------+
 ```
 
 1. Tap **LOG VISIT** or open the doctor and tap **Log Interaction**
-2. Select the type: Field Visit, Clinical Event, Congress, or Digital
-3. Choose the result (1 to 5):
+2. See the **talking points box** (appears automatically based on the last visit or the doctor's profile)
+3. Write your **before the visit** notes — what you want to cover
+4. Choose the **result** (1 to 5):
    - **1** — No (red)
    - **2** — Probably Not (orange)
    - **3** — Open (yellow)
    - **4** — Will Prescribe (green)
    - **5** — Prescribing (teal)
-4. **Visit date** — defaults to today. Tap to set an earlier date (e.g., logging a Monday visit on Wednesday). Future dates are not allowed.
-5. Toggle optional details: samples delivered, spoke face to face, follow-up scheduled
-6. Add notes if needed
-7. Tap **Log Interaction**
+5. Write your **after the visit** notes — how it went, what happened
+6. Tap **Log Visit**
+7. **Optional:** open **More details** to fill in:
+   - **Visit date** — defaults to today. Tap to set an earlier date (e.g., logging a Monday visit on Wednesday). Future dates are not allowed.
+   - **Visit type** — Field Visit, Clinical Event, Congress, or Digital
+   - **Toggles** — spoke with doctor, left samples, scheduled follow-up
+   - **Cannabis prescription** — if the doctor prescribes, log products, prescription type (RDC 660 / Pharmacy), and reasons
 
 GPS location is captured automatically (if permission granted).
+
+> **Tip:** The "Log Visit" button is intentionally above "More details." For same-day visits, just fill in the result and notes, and submit. Optional details are below so they don't slow down the quick flow.
 
 **Backdated visits in the timeline:**
 
@@ -1527,3 +1577,4 @@ This is useful for:
 | **Tag** | Managerial label assigned by Manager/Admin |
 | **Result** | Code 1-5 logged after each interaction |
 | **Expense** | Receipt submitted for reimbursement |
+| **Visit Date** | When the visit actually happened (can be backdated); different from "Logged" which is when the rep opened the app |
