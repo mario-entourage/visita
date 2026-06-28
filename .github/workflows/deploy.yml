@@ -31,14 +31,6 @@ jobs:
           EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
 
-      - name: Deploy Firestore rules and indexes
-        run: |
-          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
-          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx firebase-tools deploy --only firestore:rules,firestore:indexes --project simple-login-fdcf7 --non-interactive
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLE_LOGIN_FDCF7 }}
-
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -46,3 +38,17 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLE_LOGIN_FDCF7 }}
           channelId: live
           projectId: simple-login-fdcf7
+
+      # Runs after hosting so a Firestore-permission gap can never block an app deploy.
+      # Requires the service account to have: roles/firebaserules.admin,
+      # roles/datastore.indexAdmin, roles/serviceusage.serviceUsageConsumer.
+      # Until those are granted this step warns instead of failing the run.
+      - name: Deploy Firestore rules and indexes
+        continue-on-error: true
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx firebase-tools deploy --only firestore:rules,firestore:indexes --project simple-login-fdcf7 --non-interactive \
+            || echo "::warning::Firestore rules/indexes deploy failed — check the service account IAM roles (firebaserules.admin, datastore.indexAdmin, serviceusage.serviceUsageConsumer)."
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLE_LOGIN_FDCF7 }}
