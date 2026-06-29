@@ -44,6 +44,7 @@ jobs:
       # roles/datastore.indexAdmin, roles/serviceusage.serviceUsageConsumer.
       # Until those are granted this step warns instead of failing the run.
       - name: Deploy Firestore rules and indexes
+        if: ${{ always() }}
         continue-on-error: true
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
