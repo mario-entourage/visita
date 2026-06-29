@@ -66,13 +66,21 @@ export default function LogScreen() {
     try {
       let location: GeoPoint | undefined;
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted') {
+        // Location is optional and best-effort — never let it block the save.
+        // If the user ignores the browser permission prompt the request can
+        // hang forever, so cap the whole capture with a timeout.
+        const captureLocation = async (): Promise<GeoPoint | undefined> => {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== 'granted') return undefined;
           const loc = await Location.getCurrentPositionAsync({
             accuracy: Location.Accuracy.Balanced,
           });
-          location = new GeoPoint(loc.coords.latitude, loc.coords.longitude);
-        }
+          return new GeoPoint(loc.coords.latitude, loc.coords.longitude);
+        };
+        const timeout = new Promise<undefined>((resolve) =>
+          setTimeout(() => resolve(undefined), 8000)
+        );
+        location = await Promise.race([captureLocation(), timeout]);
       } catch {
         // Location is optional
       }

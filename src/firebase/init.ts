@@ -16,6 +16,9 @@ function createFirebaseServices() {
   const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
   const firestore = initializeFirestore(app, {
+    // Optional form fields are passed as `undefined`; without this the SDK
+    // throws ("Unsupported field value: undefined") and the write fails.
+    ignoreUndefinedProperties: true,
     localCache: persistentLocalCache({
       tabManager: persistentMultipleTabManager(),
     }),
