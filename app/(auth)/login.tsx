@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, Pressable, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   GoogleAuthProvider,
-  signInWithCredential,
   signInWithPopup,
   browserPopupRedirectResolver,
 } from 'firebase/auth';
@@ -35,70 +34,13 @@ function GoogleG({ size = 20 }: { size?: number }) {
   );
 }
 
-// Only import expo-auth-session on native
-let Google: typeof import('expo-auth-session/providers/google') | null = null;
-let WebBrowser: typeof import('expo-web-browser') | null = null;
-
-if (Platform.OS !== 'web') {
-  Google = require('expo-auth-session/providers/google');
-  WebBrowser = require('expo-web-browser');
-  WebBrowser?.maybeCompleteAuthSession();
-}
-
-// ---------- Native login hook (expo-auth-session) ----------
-function useNativeGoogleAuth() {
-  if (!Google) {
-    return { request: null, response: null, promptAsync: async () => {} };
-  }
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    // androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-  });
-
-  return { request, response, promptAsync };
-}
-
-// ---------- Component ----------
+// ---------- Component (web-only Google sign-in) ----------
 export default function LoginScreen() {
   const auth = useAuth();
-  const { user } = useUser();
+  const { user, userError } = useUser();
   const router = useRouter();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [fontsLoaded] = useFonts({ ProtestStrike_400Regular });
-
-  // Native-only Google auth hook
-  const { request, response, promptAsync } = useNativeGoogleAuth();
-
-  // Handle native OAuth response
-  useEffect(() => {
-    if (Platform.OS === 'web') return;
-    if (response?.type !== 'success') return;
-
-    const { id_token } = response.params;
-    if (!id_token) {
-      Alert.alert('Erro', 'Não foi possível obter o token de autenticação.');
-      return;
-    }
-
-    const signIn = async () => {
-      setIsSigningIn(true);
-      try {
-        const credential = GoogleAuthProvider.credential(id_token);
-        await signInWithCredential(auth, credential);
-      } catch (err: any) {
-        console.error('Firebase sign-in error:', err);
-        Alert.alert(
-          'Erro de Login',
-          err.message || 'Não foi possível fazer login. Tente novamente.'
-        );
-      } finally {
-        setIsSigningIn(false);
-      }
-    };
-
-    signIn();
-  }, [response]);
 
   // If user is already signed in, redirect to app
   useEffect(() => {
@@ -110,22 +52,9 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     setIsSigningIn(true);
     try {
-      if (Platform.OS === 'web') {
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ hd: 'entouragelab.com' });
-        await signInWithPopup(auth, provider, browserPopupRedirectResolver);
-      } else {
-        if (!request) {
-          Alert.alert(
-            'Erro',
-            'Google Sign-In não está disponível. Verifique a configuração do OAuth Client ID.'
-          );
-          setIsSigningIn(false);
-          return;
-        }
-        await promptAsync();
-        return;
-      }
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ hd: 'entouragelab.com' });
+      await signInWithPopup(auth, provider, browserPopupRedirectResolver);
     } catch (err: any) {
       console.error('Login error:', err);
       Alert.alert(
@@ -164,6 +93,10 @@ export default function LoginScreen() {
           {isSigningIn ? 'Entrando...' : 'Entrar com Google'}
         </Text>
       </Pressable>
+
+      {userError ? (
+        <Text style={styles.error}>{userError.message}</Text>
+      ) : null}
 
       <Text style={styles.restriction}>
         Acesso restrito para contas @entouragelab.com
@@ -217,6 +150,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  error: {
+    marginTop: 16,
+    fontSize: 14,
+    color: '#ffd9d9',
+    textAlign: 'center',
+    maxWidth: 360,
+    lineHeight: 20,
   },
   restriction: {
     marginTop: 16,
