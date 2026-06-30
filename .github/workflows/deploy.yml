@@ -31,32 +31,17 @@ jobs:
           EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
 
-      # action-hosting-deploy@v0 reports failure on a benign "supplied version is
-      # the current active version" 400 (identical content / retry after a network
-      # blip) even though the content deploys. Tolerate it so it stops sending
-      # false-failure emails. A genuine build break still fails at "Build web export".
-      # TODO: replace with `firebase deploy --only hosting` via the CLI once the
-      # service account has the IAM roles (see the Firestore step below).
-      - name: Deploy to Firebase Hosting
-        continue-on-error: true
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLE_LOGIN_FDCF7 }}
-          channelId: live
-          projectId: simple-login-fdcf7
-
-      # Runs after hosting so a Firestore-permission gap can never block an app deploy.
-      # Requires the service account to have: roles/firebaserules.admin,
-      # roles/datastore.indexAdmin, roles/serviceusage.serviceUsageConsumer.
-      # Until those are granted this step warns instead of failing the run.
-      - name: Deploy Firestore rules and indexes
-        if: ${{ always() }}
-        continue-on-error: true
+      # Single deploy path via the Firebase CLI: hosting + Firestore rules/indexes
+      # + Storage rules. The CLI treats an unchanged hosting deploy as a graceful
+      # no-op (no false-failure emails). Requires the service account to have:
+      # Firebase Hosting Admin, Firebase Rules Admin, Cloud Datastore Index Admin,
+      # Service Usage Consumer.
+      - name: Deploy to Firebase (hosting + Firestore + Storage)
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx firebase-tools deploy --only firestore:rules,firestore:indexes,storage --project simple-login-fdcf7 --non-interactive \
-            || echo "::warning::Firestore/Storage rules deploy failed — check the service account IAM roles (firebaserules.admin, datastore.indexAdmin, serviceusage.serviceUsageConsumer)."
+          npx firebase-tools deploy \
+            --only hosting,firestore:rules,firestore:indexes,storage \
+            --project simple-login-fdcf7 --non-interactive
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLE_LOGIN_FDCF7 }}
