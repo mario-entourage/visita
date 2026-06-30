@@ -31,29 +31,18 @@ jobs:
           EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
 
-      # Hosting via the official action (works with the SA's Hosting role and
-      # does NOT need the serviceusage preflight the CLI requires). It can report
-      # a benign "current active version" 400 on unchanged content, so tolerate it.
-      - name: Deploy to Firebase Hosting
-        continue-on-error: true
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLE_LOGIN_FDCF7 }}
-          channelId: live
-          projectId: simple-login-fdcf7
-
-      # Firestore/Storage rules via CLI. This needs the SA to have
-      # serviceusage.serviceUsageConsumer (+ firebaserules.admin, datastore.indexAdmin)
-      # on the SAME service account as the secret above. Until that's in effect it
-      # warns instead of failing the run; storage also requires Storage to be enabled.
-      - name: Deploy Firestore and Storage rules
-        if: ${{ always() }}
-        continue-on-error: true
+      # Single deploy path via the Firebase CLI: hosting + Firestore rules/indexes.
+      # The CLI no-ops cleanly on unchanged hosting content (no false-failure
+      # emails). The SA (github-action-1175548607) has Firebase Hosting Admin,
+      # Firebase Rules Admin, Cloud Datastore Index Admin, and Service Usage Consumer.
+      # Storage is intentionally excluded until Firebase Storage is enabled on the
+      # project; add `,storage` here once it is.
+      - name: Deploy to Firebase (hosting + Firestore)
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx firebase-tools deploy --only firestore:rules,firestore:indexes,storage --project simple-login-fdcf7 --non-interactive \
-            || echo "::warning::Firestore/Storage rules deploy failed — verify the IAM roles are on the service account in FIREBASE_SERVICE_ACCOUNT_SIMPLE_LOGIN_FDCF7, and that Storage is enabled."
+          npx firebase-tools deploy \
+            --only hosting,firestore:rules,firestore:indexes \
+            --project simple-login-fdcf7 --non-interactive
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLE_LOGIN_FDCF7 }}
