@@ -4,6 +4,7 @@ import React, {
   useContext,
   ReactNode,
   useMemo,
+  useRef,
   useState,
   useEffect,
   useCallback,
@@ -18,6 +19,7 @@ import {
   ROLE_PERMISSIONS,
   getPermissions,
 } from '@/types/roles';
+import { ensureRepProfile } from '@/services/reps.service';
 
 // ---------------------------------------------------------------------------
 // Static super-admin list (always gets 'admin' role)
@@ -119,8 +121,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   auth,
   storage,
 }) => {
-  // -- Auth state --
-  const [userAuthState, setUserAuthState] = useState<UserAuthState>({
+  // -- Raw Firebase auth state (no access gating yet) --
+  const [rawAuthState, setRawAuthState] = useState<UserAuthState>({
     user: null,
     isUserLoading: true,
     userError: null,
@@ -128,7 +130,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   useEffect(() => {
     if (!auth) {
-      setUserAuthState({
+      setRawAuthState({
         user: null,
         isUserLoading: false,
         userError: new Error('Auth service not provided.'),
@@ -136,38 +138,20 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       return;
     }
 
-    setUserAuthState({ user: null, isUserLoading: true, userError: null });
+    setRawAuthState({ user: null, isUserLoading: true, userError: null });
 
     const unsubscribe = onAuthStateChanged(
       auth,
       (firebaseUser) => {
-        if (
-          firebaseUser &&
-          firebaseUser.email &&
-          !firebaseUser.email.endsWith('@entouragelab.com')
-        ) {
-          console.warn(
-            `Access denied for ${firebaseUser.email}. Signing out.`
-          );
-          auth.signOut();
-          setUserAuthState({
-            user: null,
-            isUserLoading: false,
-            userError: new Error(
-              'Acesso restrito para contas @entouragelab.com. Tente novamente com a conta correta.'
-            ),
-          });
-        } else {
-          setUserAuthState({
-            user: firebaseUser,
-            isUserLoading: false,
-            userError: null,
-          });
-        }
+        setRawAuthState({
+          user: firebaseUser,
+          isUserLoading: false,
+          userError: null,
+        });
       },
       (error) => {
         console.error('FirebaseProvider: onAuthStateChanged error:', error);
-        setUserAuthState({
+        setRawAuthState({
           user: null,
           isUserLoading: false,
           userError: error,
@@ -176,6 +160,95 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     );
     return () => unsubscribe();
   }, [auth]);
+
+  // -- Access gate: @entouragelab.com accounts always pass; anyone else must
+  // -- be an active entry in allowed_users/{email} (admin-approved external
+  // -- rep — one-month-contract reps and marketplace sellers without a
+  // -- Workspace account). See isMember() in firestore.rules.
+  const [userAuthState, setUserAuthState] = useState<UserAuthState>({
+    user: null,
+    isUserLoading: true,
+    userError: null,
+  });
+
+  useEffect(() => {
+    if (rawAuthState.isUserLoading) {
+      setUserAuthState({ user: null, isUserLoading: true, userError: null });
+      return;
+    }
+
+    const firebaseUser = rawAuthState.user;
+    if (!firebaseUser) {
+      setUserAuthState({
+        user: null,
+        isUserLoading: false,
+        userError: rawAuthState.userError,
+      });
+      return;
+    }
+
+    const email = firebaseUser.email;
+    const isEntourage = !!email && email.endsWith('@entouragelab.com');
+    if (isEntourage) {
+      setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
+      return;
+    }
+
+    if (!email || !auth || !firestore) {
+      // Need an email + Firestore to check the allowlist; without one, deny.
+      auth?.signOut();
+      setUserAuthState({
+        user: null,
+        isUserLoading: false,
+        userError: new Error('Não foi possível verificar seu acesso. Tente novamente.'),
+      });
+      return;
+    }
+
+    setUserAuthState((prev) => ({ ...prev, isUserLoading: true }));
+    const allowedRef = doc(firestore, 'allowed_users', email.toLowerCase());
+    const unsubscribe = onSnapshot(
+      allowedRef,
+      (snap) => {
+        if (snap.exists() && snap.data()?.active === true) {
+          setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
+        } else {
+          console.warn(`Access denied for ${email}: not on the allowlist. Signing out.`);
+          auth.signOut();
+          setUserAuthState({
+            user: null,
+            isUserLoading: false,
+            userError: new Error(
+              'Acesso ainda não liberado para esta conta. Peça para um administrador te adicionar no Visitas.'
+            ),
+          });
+        }
+      },
+      (error) => {
+        console.error('Error checking allowlist:', error);
+        auth.signOut();
+        setUserAuthState({
+          user: null,
+          isUserLoading: false,
+          userError: new Error('Não foi possível verificar seu acesso. Tente novamente.'),
+        });
+      }
+    );
+    return () => unsubscribe();
+  }, [rawAuthState, auth, firestore]);
+
+  // -- Self-provision representantes/{uid} on first login (admin no longer
+  // -- has to create it manually — it just didn't exist before this).
+  const provisionedUidRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!firestore || !userAuthState.user) return;
+    const { uid, displayName, email } = userAuthState.user;
+    if (provisionedUidRef.current === uid) return;
+    provisionedUidRef.current = uid;
+    ensureRepProfile(firestore, uid, displayName || email || 'Usuário', email).catch(
+      (err) => console.error('Error provisioning rep profile:', err)
+    );
+  }, [firestore, userAuthState.user]);
 
   // -- Determine real role --
   // 1) Super-admin emails → 'admin'

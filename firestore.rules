@@ -10,7 +10,19 @@ service cloud.firestore {
           && request.auth.token.email.matches('.*@entouragelab\\.com');
     }
 
+    // Signed-in AND either an entourage account or an admin-approved external
+    // user (contractor / marketplace rep on a personal Google account).
+    // allowed_users/{email} is keyed by lowercased email — see allowlist below.
+    function isMember() {
+      return isEntourageUser()
+          || (request.auth != null
+              && request.auth.token.email != null
+              && exists(/databases/$(database)/documents/allowed_users/$(request.auth.token.email.lower()))
+              && get(/databases/$(database)/documents/allowed_users/$(request.auth.token.email.lower())).data.active == true);
+    }
+
     // Static super-admin list (mirrors SUPER_ADMIN_EMAILS in provider.tsx)
+    // Admin stays entourage-only — promotion is a trusted internal action.
     function isSuperAdmin() {
       return isEntourageUser()
           && request.auth.token.email in [
@@ -31,23 +43,37 @@ service cloud.firestore {
       return isSuperAdmin() || isDynamicAdmin();
     }
 
-    // Manager or admin: gerente role or admin
+    // Manager or admin: gerente role or admin (kept entourage-only, same as admin)
     function isManagerOrAdmin() {
       return isAdmin()
           || (isEntourageUser()
               && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role in ['gerente', 'admin']);
     }
 
+    // ── allowed_users (external-rep allowlist) ──────────────────────────────────
+    // Doc ID is the lowercased email an admin invites. Grants login + read/write
+    // access equivalent to an entourage account (see isMember()) without
+    // requiring a Workspace account — for one-month-contract reps and
+    // marketplace sellers who sign in with a personal Google account.
+    // Fields: { email, name, addedBy, addedAt, active }
+    match /allowed_users/{email} {
+      allow read: if isAdmin()
+                  || (request.auth != null
+                      && request.auth.token.email != null
+                      && request.auth.token.email.lower() == email);
+      allow write: if isAdmin();
+    }
+
     // ── doctors ───────────────────────────────────────────────────────────────
-    // Any rep can read. Admins can write anything.
+    // Any member can read. Admins can write anything.
     // Managers can assign reps to doctors (assignedRepId).
     // Reps can update only the CRM-computed fields (touches, propensity, etc.)
     // Reps can also report a doctor as not found at their address (reported=true only).
     match /doctors/{doctorId} {
-      allow read: if isEntourageUser();
+      allow read: if isMember();
 
       allow create: if isAdmin()
-                    || (isEntourageUser()
+                    || (isMember()
                         && request.resource.data.createdByRepId == request.auth.uid);
 
       allow delete: if isAdmin();
@@ -62,7 +88,7 @@ service cloud.firestore {
                         && request.resource.data.diff(resource.data)
                              .affectedKeys()
                              .hasOnly(['assignedRepId', 'tags', 'updatedAt']))
-                    || (isEntourageUser()
+                    || (isMember()
                         && request.resource.data.diff(resource.data)
                              .affectedKeys()
                              .hasOnly([
@@ -74,7 +100,7 @@ service cloud.firestore {
                                'updatedAt'
                              ]))
                     // Reps can unflag a doctor with a required note
-                    || (isEntourageUser()
+                    || (isMember()
                         && resource.data.flaggedForFollowUp == true
                         && request.resource.data.flaggedForFollowUp == false
                         && request.resource.data.diff(resource.data)
@@ -87,7 +113,7 @@ service cloud.firestore {
                                'updatedAt'
                              ]))
                     // Reps can set reported=true (flag as not at address); cannot clear it
-                    || (isEntourageUser()
+                    || (isMember()
                         && request.resource.data.reported == true
                         && request.resource.data.diff(resource.data)
                              .affectedKeys()
@@ -105,7 +131,7 @@ service cloud.firestore {
     // Managers, analysts, and admins can read all reports to follow up.
     // Only admins can update (mark resolved) or delete.
     match /doctor_reports/{reportId} {
-      allow create: if isEntourageUser()
+      allow create: if isMember()
                     && request.resource.data.repId == request.auth.uid;
 
       // Managers and admins see all reports. Analysts also see all (for data cleanup).
@@ -113,7 +139,7 @@ service cloud.firestore {
       allow read: if isManagerOrAdmin()
                   || (isEntourageUser()
                       && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'analista')
-                  || (isEntourageUser()
+                  || (isMember()
                       && resource.data.repId == request.auth.uid);
 
       allow update: if isAdmin();
@@ -122,26 +148,26 @@ service cloud.firestore {
     }
 
     // ── interactions ─────────────────────────────────────────────────────────
-    // Any rep can read all interactions. Reps can create their own.
+    // Any member can read all interactions. Reps can create their own.
     // Only the owning rep or an admin can update/delete.
     match /interactions/{interactionId} {
-      allow read: if isEntourageUser();
+      allow read: if isMember();
 
-      allow create: if isEntourageUser()
+      allow create: if isMember()
                     && request.resource.data.repId == request.auth.uid
                     && (
                          !('visitDate' in request.resource.data)
                          || request.resource.data.visitDate <= request.time
                        );
 
-      allow update: if isEntourageUser()
+      allow update: if isMember()
                    && (resource.data.repId == request.auth.uid || isAdmin())
                    && (
                         !('visitDate' in request.resource.data)
                         || request.resource.data.visitDate <= request.time
                       );
 
-      allow delete: if isEntourageUser()
+      allow delete: if isMember()
                     && (resource.data.repId == request.auth.uid || isAdmin());
     }
 
@@ -150,18 +176,18 @@ service cloud.firestore {
     // Reps can create their own visits (self-assigned, e.g. from Calendar sync).
     // Reps can update their own visits (e.g. to link googleCalendarEventId).
     match /scheduled_visits/{visitId} {
-      allow read: if isEntourageUser()
+      allow read: if isMember()
                   && (resource.data.repId == request.auth.uid || isAdmin());
 
       allow create: if isAdmin()
                     || isManagerOrAdmin()
-                    || (isEntourageUser()
+                    || (isMember()
                         && request.resource.data.repId == request.auth.uid
                         && request.resource.data.assignedBy == request.auth.uid);
 
       allow update: if isAdmin()
                     || isManagerOrAdmin()
-                    || (isEntourageUser()
+                    || (isMember()
                         && resource.data.repId == request.auth.uid
                         && request.resource.data.repId == resource.data.repId);
 
@@ -171,7 +197,7 @@ service cloud.firestore {
     // ── weekly_goals ───────────────────────────────────────────────────────────
     // Managers set weekly visit targets for reps.
     match /weekly_goals/{goalId} {
-      allow read: if isEntourageUser();
+      allow read: if isMember();
       allow write: if isManagerOrAdmin();
     }
 
@@ -180,7 +206,7 @@ service cloud.firestore {
     // Only admins can assign roles.
     // Fields: { role: 'representante'|'gerente'|'analista'|'admin' }
     match /roles/{userId} {
-      allow read: if isEntourageUser()
+      allow read: if isMember()
                   && (request.auth.uid == userId || isAdmin());
       allow write: if isAdmin();
     }
@@ -194,10 +220,11 @@ service cloud.firestore {
     }
 
     // ── representantes ────────────────────────────────────────────────────────
-    // Any rep can read profiles. Each rep can write only their own.
+    // Any member can read profiles. Each rep can write only their own
+    // (this is also how a user's profile gets created on first login).
     match /representantes/{userId} {
-      allow read: if isEntourageUser();
-      allow write: if isEntourageUser() && request.auth.uid == userId;
+      allow read: if isMember();
+      allow write: if isMember() && request.auth.uid == userId;
     }
 
     // ── expenses ──────────────────────────────────────────────────────────────
@@ -205,13 +232,13 @@ service cloud.firestore {
     // Managers and admins can read all expenses (for accounting review).
     // Only the owning rep or admin can update/delete.
     match /expenses/{expenseId} {
-      allow create: if isEntourageUser()
+      allow create: if isMember()
                     && request.resource.data.repId == request.auth.uid;
 
-      allow read: if isEntourageUser()
+      allow read: if isMember()
                   && (resource.data.repId == request.auth.uid || isManagerOrAdmin());
 
-      allow update, delete: if isEntourageUser()
+      allow update, delete: if isMember()
                             && (resource.data.repId == request.auth.uid || isAdmin());
     }
   }

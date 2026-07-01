@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   Pressable,
+  TextInput,
   ActivityIndicator,
   Alert,
   Platform,
@@ -15,6 +16,13 @@ import { useFirestore, useUser, useMemoFirebase } from '@/firebase/provider';
 import { useCollection } from '@/firebase/use-collection';
 import { getActiveRepsQuery } from '@/services/reps.service';
 import { getAllRolesQuery, setUserRole } from '@/services/roles.service';
+import {
+  getAllowedUsersQuery,
+  inviteUser,
+  revokeUser,
+  reactivateUser,
+  type AllowedUser,
+} from '@/services/allowlist.service';
 import { C, S } from '@/theme';
 import {
   UserRole,
@@ -57,12 +65,29 @@ export default function UserManagementScreen() {
     [db, myRole]
   );
 
+  const allowedQuery = useMemoFirebase(
+    () => (db && myRole === 'admin' ? getAllowedUsersQuery(db) : null),
+    [db, myRole]
+  );
+
   const { data: reps, isLoading: repsLoading } =
     useCollection<Representante>(repsQuery);
   const { data: roleDocs, isLoading: rolesLoading } =
     useCollection<RoleDoc>(rolesQuery);
+  const { data: allowedUsers, isLoading: allowedLoading } =
+    useCollection<AllowedUser>(allowedQuery);
 
-  const isLoading = repsLoading || rolesLoading;
+  const isLoading = repsLoading || rolesLoading || allowedLoading;
+
+  // Emails that already have a representante profile (i.e. have logged in
+  // at least once) — used to mark allowlist entries as pending vs. active.
+  const loggedInEmails = useMemo(() => {
+    const set = new Set<string>();
+    (reps ?? []).forEach((r) => {
+      if (r.email) set.add(r.email.toLowerCase());
+    });
+    return set;
+  }, [reps]);
 
   // Build a map: userId → role from Firestore
   const roleMap = useMemo(() => {
@@ -117,6 +142,57 @@ export default function UserManagementScreen() {
     [db]
   );
 
+  // -- Invite (allowlist) state --------------------------------------------
+  const { user: me } = useUser();
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [inviteName, setInviteName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviting, setInviting] = useState(false);
+
+  const handleInvite = useCallback(async () => {
+    if (!db || !me) return;
+    const name = inviteName.trim();
+    const email = inviteEmail.trim().toLowerCase();
+    if (!name || !email.includes('@')) {
+      const msg = 'Informe nome e um email válido.';
+      Platform.OS === 'web' ? alert(msg) : Alert.alert('Erro', msg);
+      return;
+    }
+    setInviting(true);
+    try {
+      await inviteUser(db, email, name, me.uid);
+      setInviteName('');
+      setInviteEmail('');
+      setShowInviteForm(false);
+      const msg = `${name} pode entrar agora com a conta Google ${email}.`;
+      Platform.OS === 'web' ? alert(msg) : Alert.alert('Convite enviado', msg);
+    } catch (err) {
+      console.error('Error inviting user:', err);
+      const msg = 'Não foi possível adicionar este usuário.';
+      Platform.OS === 'web' ? alert(msg) : Alert.alert('Erro', msg);
+    } finally {
+      setInviting(false);
+    }
+  }, [db, me, inviteName, inviteEmail]);
+
+  const handleToggleAccess = useCallback(
+    async (entry: AllowedUser) => {
+      if (!db) return;
+      try {
+        if (entry.active) {
+          await revokeUser(db, entry.email);
+        } else {
+          await reactivateUser(db, entry.email);
+        }
+      } catch (err) {
+        console.error('Error toggling allowlist entry:', err);
+        const msg = 'Não foi possível atualizar o acesso.';
+        Platform.OS === 'web' ? alert(msg) : Alert.alert('Erro', msg);
+      }
+    },
+    [db]
+  );
+
   if (myRole !== 'admin') {
     return (
       <View style={styles.center}>
@@ -147,10 +223,98 @@ export default function UserManagementScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.headerRow}>
           <Ionicons name="people" size={20} color={C.teal} />
-          <Text style={styles.headerText}>
+          <Text style={[styles.headerText, { flex: 1 }]}>
             {users.length} {users.length === 1 ? 'usuario' : 'usuarios'}
           </Text>
+          <Pressable
+            style={styles.inviteBtn}
+            onPress={() => setShowInviteForm((v) => !v)}
+          >
+            <Ionicons
+              name={showInviteForm ? 'close' : 'person-add'}
+              size={16}
+              color={C.white}
+            />
+            <Text style={styles.inviteBtnText}>
+              {showInviteForm ? 'Cancelar' : 'Convidar'}
+            </Text>
+          </Pressable>
         </View>
+
+        {/* Invite form — for one-month-contract reps / marketplace sellers
+            without a Workspace account. They sign in with any Google account
+            once their email is added here. */}
+        {showInviteForm ? (
+          <View style={styles.inviteForm}>
+            <Text style={styles.inviteFormLabel}>Nome</Text>
+            <TextInput
+              style={styles.inviteInput}
+              value={inviteName}
+              onChangeText={setInviteName}
+              placeholder="Nome do representante"
+              placeholderTextColor={C.textLight}
+            />
+            <Text style={styles.inviteFormLabel}>Email (conta Google)</Text>
+            <TextInput
+              style={styles.inviteInput}
+              value={inviteEmail}
+              onChangeText={setInviteEmail}
+              placeholder="nome@gmail.com"
+              placeholderTextColor={C.textLight}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <Pressable
+              style={[styles.inviteSubmitBtn, inviting && styles.buttonDisabled]}
+              onPress={handleInvite}
+              disabled={inviting}
+            >
+              <Text style={styles.inviteSubmitText}>
+                {inviting ? 'Adicionando...' : 'Liberar acesso'}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        {/* External / invited users not on @entouragelab.com */}
+        {allowedUsers && allowedUsers.length > 0 ? (
+          <View style={styles.allowedSection}>
+            <Text style={styles.allowedSectionTitle}>ACESSO EXTERNO</Text>
+            {allowedUsers.map((entry) => {
+              const hasLoggedIn = loggedInEmails.has(entry.email.toLowerCase());
+              return (
+                <View key={entry.id} style={styles.allowedCard}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.userName}>{entry.name}</Text>
+                    <Text style={styles.userEmail}>{entry.email}</Text>
+                    <Text
+                      style={[
+                        styles.allowedStatus,
+                        { color: entry.active ? C.teal : C.textLight },
+                      ]}
+                    >
+                      {entry.active
+                        ? hasLoggedIn
+                          ? 'Ativo'
+                          : 'Convidado — aguardando primeiro login'
+                        : 'Acesso revogado'}
+                    </Text>
+                  </View>
+                  <Pressable
+                    style={styles.editBtn}
+                    onPress={() => handleToggleAccess(entry)}
+                  >
+                    <Ionicons
+                      name={entry.active ? 'close-circle-outline' : 'refresh'}
+                      size={18}
+                      color={entry.active ? C.red : C.teal}
+                    />
+                  </Pressable>
+                </View>
+              );
+            })}
+          </View>
+        ) : null}
 
         {users.map((u) => {
           const isEditing = editingUid === u.uid;
@@ -289,6 +453,89 @@ const styles = StyleSheet.create({
     color: C.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  // ── Invite ─────────────────────────────────────────────────
+  inviteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: C.teal,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  inviteBtnText: {
+    color: C.white,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  inviteForm: {
+    backgroundColor: C.card,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    padding: 16,
+    ...S.card,
+  },
+  inviteFormLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: C.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+    marginTop: 8,
+  },
+  inviteInput: {
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: C.text,
+  },
+  inviteSubmitBtn: {
+    backgroundColor: C.teal,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  inviteSubmitText: {
+    color: C.white,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  allowedSection: {
+    marginBottom: 8,
+  },
+  allowedSectionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: C.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    paddingHorizontal: 20,
+    marginBottom: 6,
+  },
+  allowedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.card,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 12,
+    padding: 14,
+    ...S.card,
+  },
+  allowedStatus: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
   },
   // ── User card ──────────────────────────────────────────────
   userCard: {

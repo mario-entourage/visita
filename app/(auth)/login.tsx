@@ -52,8 +52,10 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     setIsSigningIn(true);
     try {
+      // No `hd` (hosted domain) hint — access isn't entouragelab.com-only
+      // anymore. External reps sign in with a personal Google account that
+      // an admin has approved in Usuários (see allowed_users / isMember()).
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ hd: 'entouragelab.com' });
       await signInWithPopup(auth, provider, browserPopupRedirectResolver);
     } catch (err: any) {
       console.error('Login error:', err);
@@ -99,7 +101,7 @@ export default function LoginScreen() {
       ) : null}
 
       <Text style={styles.restriction}>
-        Acesso restrito para contas @entouragelab.com
+        Acesso por convite — contas @entouragelab.com ou liberadas por um administrador
       </Text>
     </View>
   );

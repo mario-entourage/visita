@@ -1,11 +1,10 @@
 rules_version = '2';
 
 // Expense receipt photos live at expenses/{repId}/{file}.
-// Mirrors the Firestore model: only signed-in @entouragelab.com users.
-// A rep may write/delete only inside their own folder; any entourage user
-// may read (managers/admins review receipts). NOTE: when external reps are
-// added via an allowlist, this domain check must be revisited (Storage rules
-// cannot read Firestore — a custom auth claim is the clean path).
+// Mirrors the Firestore isMember() model: entourage accounts OR an
+// admin-approved external user in /allowed_users/{email} (see firestore.rules).
+// A rep may write/delete only inside their own folder; any member may read
+// (managers/admins review receipts).
 service firebase.storage {
   match /b/{bucket}/o {
     function isEntourageUser() {
@@ -13,13 +12,21 @@ service firebase.storage {
           && request.auth.token.email.matches('.*@entouragelab[.]com');
     }
 
+    function isMember() {
+      return isEntourageUser()
+          || (request.auth != null
+              && request.auth.token.email != null
+              && firestore.exists('/databases/(default)/documents/allowed_users/' + request.auth.token.email.lower())
+              && firestore.get('/databases/(default)/documents/allowed_users/' + request.auth.token.email.lower()).data.active == true);
+    }
+
     match /expenses/{repId}/{fileName} {
-      allow read: if isEntourageUser();
-      allow write: if isEntourageUser()
+      allow read: if isMember();
+      allow write: if isMember()
                    && request.auth.uid == repId
                    && request.resource.size < 10 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
-      allow delete: if isEntourageUser() && request.auth.uid == repId;
+      allow delete: if isMember() && request.auth.uid == repId;
     }
 
     // Deny everything else by default.
